@@ -13,10 +13,10 @@ class CredentialsServiceImpl(
     private var lastServed: List<CredentialEntry> = emptyList()
 
     override fun doesEntryExist(url: String): Boolean {
-        try {
-            return retrieveEntriesAssociatedToUrl(url).isNotEmpty()
+        return try {
+            retrieveEntriesAssociatedToUrl(url).isNotEmpty()
         } catch (e: Exception) {
-            return false
+            false
         }
     }
 

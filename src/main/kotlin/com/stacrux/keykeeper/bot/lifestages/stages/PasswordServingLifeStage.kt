@@ -49,11 +49,11 @@ class PasswordServingLifeStage(
 
     override fun reactToTextRequest(request: TextRequestFromTelegram) {
         val textContent = request.textContent
-
-        when {
-            credentialsService.doesEntryExist(textContent) -> sendCredentialsMessage(chatId, textContent)
-            else -> sendNoCredentialsMessage(chatId, textContent)
+        if (credentialsService.doesEntryExist(textContent)) {
+            sendCredentialsMessage(chatId, textContent)
+            return
         }
+        sendNoCredentialsMessage(chatId, textContent)
     }
 
     private fun sendParsingErrorMessage(chatId: String) {
@@ -86,11 +86,14 @@ class PasswordServingLifeStage(
     }
 
     private fun sendNoCredentialsMessage(chatId: String, textContent: String) {
-        val websiteIdentifier = websiteParsingService.extractWebsiteIdentifier(textContent)
-
+        val websiteIdentifier = try {
+            websiteParsingService.extractWebsiteIdentifier(textContent).wholeDomain
+        } catch (e: Exception) {
+            textContent
+        }
         sendMessage(
             chatId,
-            "I found no passwords for ${websiteIdentifier.wholeDomain}, " +
+            "I found no stored credentials for [${websiteIdentifier}], " +
                     "do you want to register it? Click below \uD83D\uDC47",
             actionButtons = primaryActions
         )
