@@ -26,7 +26,7 @@ Use this bot at your own risk and keeping in mind what is written above.
 ### Components
 
 1. **Bot Life Stages**: The bot current state is called Life Stage, any life stage is an extension of `AbstractBotLifeStage`
-   - `Binding a user id`: This bot is designed to interact with a single user, which must be bound at the first start
+   - `Binding a user id`: This bot life stage is designed to interact with a single user, which must be bound at the first start
    - `Serving credentials`: The main life stage, the bot expects any URL as message and will return the related credentials (if present)
    - `Add new credentials`: In this life stage the bot register new credentials 
    - `BackUpLifeStage`: Manages backup and restore functionalities
