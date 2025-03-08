@@ -2,7 +2,6 @@ package com.stacrux.keykeeper.bot.helper
 
 import com.stacrux.keykeeper.ServiceProvider
 import com.stacrux.keykeeper.model.*
-import com.stacrux.keykeeper.service.MonitoringService
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
@@ -14,7 +13,7 @@ object MessageConverter {
 
     private val logger = LoggerFactory.getLogger(MessageConverter::class.java)
 
-    fun formatMessageCount(map: Map<MonitoringService.TelegramUserDetails, Int>): String {
+    fun formatMessageCount(map: Map<TelegramUserDetails, Int>): String {
         return buildString {
             appendLine("```")
             appendLine("Count\t|\tUserId\t|\tUserName\t|\tget_messages")
@@ -62,7 +61,7 @@ object MessageConverter {
 
         val defaultMonitoringService = ServiceProvider.getDefaultMonitoringService()
         fun recordInteraction(userId: String, username: String, request: RequestFromTelegram) {
-            defaultMonitoringService.recordInteraction(MonitoringService.TelegramUserDetails(userId, username), request)
+            defaultMonitoringService.recordInteraction(TelegramUserDetails(userId, username), request)
         }
 
         // Handle callback query
@@ -72,9 +71,12 @@ object MessageConverter {
             val username = callbackQuery.from?.userName ?: "Unknown"
             val chatId = callbackQuery.message.chatId.toString()
             val action = callbackQuery.data
+            val messageId = callbackQuery.message.messageId
             logger.info("Received action from @$username - $userId: $action")
 
-            val actionRequest = ActionRequestFromTelegram(chatId, userId, username, action, callbackQuery.id)
+            val actionRequest = ActionRequestFromTelegram(
+                chatId, userId, username, action, callbackQuery.id, messageId
+            )
             recordInteraction(userId, username, actionRequest)
             return actionRequest
         }

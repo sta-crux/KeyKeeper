@@ -35,7 +35,7 @@ class SessionManagerFS : SessionManager {
             return false
         }
         return try {
-            val session = yamlMapper.readValue<SessionManager.ChatSession>(sessionFile)
+            val session = yamlMapper.readValue<SessionManager.FsChatSession>(sessionFile)
             val exists = StringUtils.isNotEmpty(session.boundUserId)
             logger.info("Session exists: $exists")
             exists
@@ -45,7 +45,7 @@ class SessionManagerFS : SessionManager {
         }
     }
 
-    override fun retrieveSession(): SessionManager.ChatSession {
+    override fun retrieveSession(): SessionManager.FsChatSession {
         if (!doesSessionExist()) {
             logger.error("Attempted to retrieve session, but none exists.")
             throw IllegalStateException("No active session found")
@@ -56,7 +56,7 @@ class SessionManagerFS : SessionManager {
 
     override fun storeSessionDetailsUserId(userId: String) {
         logger.info("Storing session details for userId: $userId")
-        val session = SessionManager.ChatSession(userId, lastBackUpTag = null, autoBackUpFeatureEnabled = false)
+        val session = SessionManager.FsChatSession(userId, lastBackUpTag = null, autoBackUpFeatureEnabled = false)
         yamlMapper.writeValue(sessionFile, session)
         logger.info("Session details stored successfully.")
     }

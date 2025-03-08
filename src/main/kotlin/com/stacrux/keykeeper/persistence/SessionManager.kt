@@ -2,15 +2,16 @@ package com.stacrux.keykeeper.persistence
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.stacrux.keykeeper.model.ChatSession
 import java.io.File
 
 interface SessionManager {
 
-    data class ChatSession @JsonCreator constructor(
-        @JsonProperty("boundUserId") val boundUserId: String,
-        @JsonProperty("lastBackUpTag") val lastBackUpTag: String?,
-        @JsonProperty("localBackUpEnabled") val autoBackUpFeatureEnabled: Boolean = false
-    )
+    data class FsChatSession @JsonCreator constructor(
+        @JsonProperty("boundUserId") override val boundUserId: String,
+        @JsonProperty("lastBackUpTag") override val lastBackUpTag: String?,
+        @JsonProperty("localBackUpEnabled") override val autoBackUpFeatureEnabled: Boolean = false
+    ) : ChatSession(boundUserId, lastBackUpTag, autoBackUpFeatureEnabled)
 
     fun storeCredentialsFile(backupFile: File, tag: String)
     fun doesSessionExist(): Boolean

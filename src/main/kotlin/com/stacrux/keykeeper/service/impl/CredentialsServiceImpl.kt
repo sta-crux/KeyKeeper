@@ -10,6 +10,8 @@ class CredentialsServiceImpl(
     private val webSiteExtractor: WebsiteParsingService
 ) : CredentialsService {
 
+    private var lastServed: List<CredentialEntry> = emptyList()
+
     override fun doesEntryExist(url: String): Boolean {
         val host = webSiteExtractor.extractWebsiteIdentifier(url).wholeDomain
         return credentialsManager.doesHostExist(host)
@@ -32,10 +34,16 @@ class CredentialsServiceImpl(
             throw Exception()
         }
         val hostFromUrl = webSiteExtractor.extractWebsiteIdentifier(url)
-        return credentialsManager.getCredentialsForHost(hostFromUrl.wholeDomain)
+        val credentialsForHost = credentialsManager.getCredentialsForHost(hostFromUrl.wholeDomain)
+        lastServed = credentialsForHost
+        return credentialsForHost
     }
 
     override fun getAllCredentials(): List<CredentialEntry> {
         return credentialsManager.getAll()
+    }
+
+    override fun getLastServedCredentials(): List<CredentialEntry> {
+        return lastServed
     }
 }

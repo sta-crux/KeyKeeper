@@ -3,6 +3,9 @@ package com.stacrux.keykeeper.service
 import com.stacrux.keykeeper.model.CredentialEntry
 import java.io.File
 
+/**
+ * Service to create or import backup files
+ */
 interface BackUpService {
 
     fun createBackUpFile(credentials: List<CredentialEntry>, backUpTag: String, encryptionKey: String, userId: String): File

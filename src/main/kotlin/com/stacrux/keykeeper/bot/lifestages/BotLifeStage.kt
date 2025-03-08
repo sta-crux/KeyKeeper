@@ -49,7 +49,13 @@ interface BotLifeStage : LongPollingSingleThreadUpdateConsumer {
      * @param newContent new text content that replaces the previous one
      * @param editAfterMinutes delay to perform the edit
      */
-    fun editMessage(chatId: String, messageId: Int, newContent: String, editAfterMinutes: Int)
+    fun editMessage(
+        chatId: String,
+        messageId: Int,
+        newContent: String,
+        requiresMarkdown: Boolean = false,
+        editAfterMinutes: Int
+    )
 
     /**
      * By calling this method, a file is sent to the chat (determined by the chatId)

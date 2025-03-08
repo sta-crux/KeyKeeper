@@ -2,6 +2,9 @@ package com.stacrux.keykeeper.service
 
 import java.io.File
 
+/**
+ * Service to define and get session properties
+ */
 interface SessionService {
 
     fun isStoringBackUps(): Boolean

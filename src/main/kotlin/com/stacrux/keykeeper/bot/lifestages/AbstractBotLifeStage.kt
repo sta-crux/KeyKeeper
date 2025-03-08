@@ -142,16 +142,28 @@ abstract class AbstractBotLifeStage(private val botToken: String) : BotLifeStage
         return telegramClient.execute(message).messageId
     }
 
-    override fun editMessage(chatId: String, messageId: Int, newContent: String, editAfterMinutes: Int) {
+    override fun editMessage(
+        chatId: String,
+        messageId: Int,
+        newContent: String,
+        requiresMarkdown: Boolean,
+        editAfterMinutes: Int
+    ) {
         logger.info("Scheduling message edit in {} minutes for chat {}: {}", editAfterMinutes, chatId, newContent)
+
         scheduler.schedule({
-            logger.info("Editing message {} in chat {}: {}", messageId, chatId, newContent)
-            val editMessage = EditMessageText.builder()
-                .chatId(chatId)
-                .messageId(messageId)
-                .text(newContent)
-                .build()
-            telegramClient.execute(editMessage)
+            try {
+                logger.info("Editing message {} in chat {}", messageId, chatId)
+                val editMessage = EditMessageText.builder()
+                    .chatId(chatId)
+                    .messageId(messageId)
+                    .text(if (requiresMarkdown) escapeMarkdownV2(newContent) else newContent)
+                    .apply { if (requiresMarkdown) parseMode("MarkdownV2") }
+                    .build()
+                telegramClient.execute(editMessage)
+            } catch (t: Throwable) {
+                logger.error("I could not edit message with id {} in chat {}", messageId, chatId)
+            }
         }, editAfterMinutes.toLong(), TimeUnit.MINUTES)
     }
 

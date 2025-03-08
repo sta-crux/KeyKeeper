@@ -3,12 +3,17 @@ package com.stacrux.keykeeper
 import com.stacrux.keykeeper.bot.KeyKeeper
 import com.stacrux.keykeeper.bot.KeyKeeperImpl
 import com.stacrux.keykeeper.persistence.CredentialsManager
+import com.stacrux.keykeeper.persistence.InteractionsManager
 import com.stacrux.keykeeper.persistence.SessionManager
 import com.stacrux.keykeeper.persistence.impl.CredentialsInMemoryObj
+import com.stacrux.keykeeper.persistence.impl.InMemoryInteractionManager
 import com.stacrux.keykeeper.persistence.impl.SessionManagerFS
 import com.stacrux.keykeeper.service.*
 import com.stacrux.keykeeper.service.impl.*
 
+/**
+ * Use this object to retrieve the services wherever they are needed
+ */
 object ServiceProvider {
 
     fun getKeyKeeperService(): KeyKeeper {
@@ -35,7 +40,7 @@ object ServiceProvider {
     }
 
     fun getDefaultMonitoringService(): MonitoringService {
-        return InMemoryMonitoringService
+        return MonitoringServiceImpl(subServiceProvider.getDefaultInteractionsManager())
     }
 
     /*
@@ -44,7 +49,7 @@ object ServiceProvider {
     private val subServiceProvider: SubServicesProvider = SubServicesProvider.createInstance()
 
     /**
-     * These are not accessible outside services
+     * These are not to be accessed directly
      */
     class SubServicesProvider private constructor() {
         fun getDefaultSessionManager(): SessionManager {
@@ -53,6 +58,10 @@ object ServiceProvider {
 
         fun getDefaultCredentialsManager(): CredentialsManager {
             return CredentialsInMemoryObj
+        }
+
+        fun getDefaultInteractionsManager(): InteractionsManager {
+            return InMemoryInteractionManager
         }
 
         companion object {

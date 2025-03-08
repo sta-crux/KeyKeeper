@@ -4,6 +4,7 @@ import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.isAccessible
 
 /**
+ * Extend this class if you want to test hidden services
  * Only for tests we expose the hidden layers in the Service Provider to have direct access for Unit Testing
  */
 open class TestsSetup {

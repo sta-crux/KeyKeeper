@@ -27,14 +27,22 @@ class PasswordServingLifeStage(
         ActionButton(buttonText = "\uD83D\uDD0F Add new credentials", actionIdentifier = addActionIdentifier),
         ActionButton(buttonText = backUpOptionsLabel, actionIdentifier = backUpActionIdentifier)
     )
+    private val copyModeActionIdentifier = "copy_mode"
+    private val actionsOnSecretMessage = listOf(
+        ActionButton(buttonText = "Copy mode", copyModeActionIdentifier)
+    )
+
+    private var lastCredentialsMessageId: Int = -1
 
     init {
         logger.info("Starting PasswordServingBot")
         if (credentialsService.getAllCredentials().isEmpty()) {
-            val message = "[\uD83D\uDECE\uFE0F Serving mode]\n You have zero credentials stored, you can add some clicking below \uD83D\uDC47"
+            val message =
+                "[\uD83D\uDECE\uFE0F Serving mode]\n You have zero credentials stored, you can add some clicking below \uD83D\uDC47"
             sendMessage(chatId, message, actionButtons = primaryActions)
         } else {
-            val message = "[\uD83D\uDECE\uFE0F Serving mode]\nDirectly paste the websites and hit send to get your credentials!"
+            val message =
+                "[\uD83D\uDECE\uFE0F Serving mode]\nDirectly paste the websites and hit send to get your credentials!"
             sendMessage(chatId, message, actionButtons = primaryActions)
         }
     }
@@ -63,12 +71,19 @@ class PasswordServingLifeStage(
         if (entries.isEmpty()) {
             return
         }
-        val timeIntervalToModify = 15;
+        val timeIntervalToModify = 1;
         var formattedMessage = "Your saved passwords for this website are below, the content will disappear " +
                 "in $timeIntervalToModify minutes\n"
         formattedMessage += formatCredentialsAsYaml(entries)
-        val messageId = sendMessage(chatId, formattedMessage, asSpoiler = true)
-        editMessage(chatId, messageId, "Nothing to see here \uD83E\uDD77\uD83C\uDFFC", timeIntervalToModify)
+        val messageId = sendMessage(chatId, formattedMessage, asSpoiler = true, actionButtons = actionsOnSecretMessage)
+        lastCredentialsMessageId = messageId
+        editMessage(
+            chatId,
+            messageId,
+            "Nothing to see here \uD83E\uDD77\uD83C\uDFFC",
+            false,
+            timeIntervalToModify
+        )
     }
 
     private fun sendNoCredentialsMessage(chatId: String, textContent: String) {
@@ -93,6 +108,11 @@ class PasswordServingLifeStage(
             getKeyKeeper().advanceBotLifeStage(chatId, BotRunningState.BACKUP)
             return
         }
+        if (request.action == copyModeActionIdentifier && lastCredentialsMessageId == request.messageId) {
+            val clearContent = formatCredentialsAsCopyableYaml(credentialsService.getLastServedCredentials())
+            editMessage(chatId = chatId, messageId = request.messageId, clearContent, true, 0)
+            return
+        }
         sendMessage(chatId, "Sorry, that button does not work in this context", actionButtons = primaryActions)
     }
 
@@ -114,6 +134,20 @@ class PasswordServingLifeStage(
                 append("\uD83C\uDFE0 host: $host\n")
                 append("\uD83D\uDC65 login: $username\n")
                 append("\uD83D\uDD12 secret: $password\n")
+                append("\n")
+            }
+        }
+    }
+
+    private fun formatCredentialsAsCopyableYaml(entries: List<CredentialEntry>): String {
+        return buildString {
+            entries.forEach { entry ->
+                val host = entry.host
+                val username = entry.username ?: "n/a"
+                val password = entry.password
+                append("\uD83C\uDFE0 host: $host\n")
+                append("\uD83D\uDC65 login: `$username`\n")
+                append("\uD83D\uDD12 secret: `$password`\n")
                 append("\n")
             }
         }
