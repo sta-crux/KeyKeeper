@@ -1,9 +1,13 @@
 package com.stacrux.keykeeper.service.impl
 
 import com.stacrux.keykeeper.service.WebsiteParsingService
+import org.slf4j.LoggerFactory
 import java.net.URI
 
 class WebSiteExtractor : WebsiteParsingService {
+
+    private val logger = LoggerFactory.getLogger(WebSiteExtractor::class.java)
+
 
     override fun extractWebsiteIdentifier(url: String): WebsiteParsingService.WebSiteIdentifier {
         try {

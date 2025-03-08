@@ -30,13 +30,20 @@ class CredentialsServiceImpl(
     }
 
     override fun retrieveEntriesAssociatedToUrl(url: String): List<CredentialEntry> {
-        if (!doesEntryExist(url)) {
-            throw Exception()
+        val matches: MutableSet<CredentialEntry> = mutableSetOf()
+        try {
+            val hostFromUrl = webSiteExtractor.extractWebsiteIdentifier(url)
+            val credentialsForHost = credentialsManager.getCredentialsForHost(hostFromUrl.wholeDomain)
+            matches.addAll(credentialsForHost)
+        } catch (e: Exception) {
+            val partialHost = url.split(".").filter { it.length > 3 }
+            for (part in partialHost) {
+                val credentialsForHost = credentialsManager.getCredentialsForHost(part)
+                matches.addAll(credentialsForHost)
+            }
         }
-        val hostFromUrl = webSiteExtractor.extractWebsiteIdentifier(url)
-        val credentialsForHost = credentialsManager.getCredentialsForHost(hostFromUrl.wholeDomain)
-        lastServed = credentialsForHost
-        return credentialsForHost
+        lastServed = matches.toList()
+        return matches.toList()
     }
 
     override fun getAllCredentials(): List<CredentialEntry> {

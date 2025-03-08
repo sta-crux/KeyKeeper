@@ -9,8 +9,10 @@ object CredentialsInMemoryObj : CredentialsManager {
         mutableListOf()
 
     override fun getCredentialsForHost(host: String): List<CredentialEntry> {
-        return inMemoryCredentials
-            .filter { it.host == host }
+        val normalizedHost = host.lowercase() // Normalize input to lowercase
+        return inMemoryCredentials.filter { credential ->
+            credential.host.lowercase().contains(normalizedHost) // Perform a case-insensitive substring match
+        }
     }
 
     override fun doesHostExist(host: String): Boolean {
