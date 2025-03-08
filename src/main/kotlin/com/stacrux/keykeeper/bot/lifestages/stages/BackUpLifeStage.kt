@@ -137,8 +137,8 @@ class BackUpLifeStage(
         val backUpTag = RandomStringUtils.randomAlphanumeric(16)
         sendMessage(
             request.chatId, "Store this secret in your Saved Messages, then delete it from here.\n" +
-                    "\uD83C\uDFF7\uFE0F backup file tag: $backUpTag\n" +
-                    "\uD83D\uDD11 backup file password: $encryptionKey"
+                    "\uD83C\uDFF7\uFE0F backup file tag: `$backUpTag`\n" +
+                    "\uD83D\uDD11 backup file password: `$encryptionKey`", requiresMarkdown = true
         )
         val backUpFile = backUpService.createBackUpFile(
             credentialsService.getAllCredentials(),
