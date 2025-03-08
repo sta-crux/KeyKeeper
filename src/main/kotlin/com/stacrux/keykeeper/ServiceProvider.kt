@@ -6,14 +6,8 @@ import com.stacrux.keykeeper.persistence.CredentialsManager
 import com.stacrux.keykeeper.persistence.SessionManager
 import com.stacrux.keykeeper.persistence.impl.CredentialsInMemoryObj
 import com.stacrux.keykeeper.persistence.impl.SessionManagerFS
-import com.stacrux.keykeeper.service.BackUpService
-import com.stacrux.keykeeper.service.CredentialsService
-import com.stacrux.keykeeper.service.SessionService
-import com.stacrux.keykeeper.service.WebsiteParsingService
-import com.stacrux.keykeeper.service.impl.BackUpArchive
-import com.stacrux.keykeeper.service.impl.CredentialsServiceImpl
-import com.stacrux.keykeeper.service.impl.SessionServiceImpl
-import com.stacrux.keykeeper.service.impl.WebSiteExtractor
+import com.stacrux.keykeeper.service.*
+import com.stacrux.keykeeper.service.impl.*
 
 object ServiceProvider {
 
@@ -40,6 +34,9 @@ object ServiceProvider {
         )
     }
 
+    fun getDefaultMonitoringService(): MonitoringService {
+        return InMemoryMonitoringService
+    }
 
     /*
      * Private part

@@ -3,9 +3,9 @@ package com.stacrux.keykeeper.bot.lifestages
 import com.stacrux.keykeeper.ServiceProvider
 import com.stacrux.keykeeper.bot.KeyKeeper
 import com.stacrux.keykeeper.bot.model.ActionButton
-import com.stacrux.keykeeper.bot.model.ActionRequestFromTelegram
-import com.stacrux.keykeeper.bot.model.FileProvidedByTelegramUser
-import com.stacrux.keykeeper.bot.model.TextRequestFromTelegram
+import com.stacrux.keykeeper.model.ActionRequestFromTelegram
+import com.stacrux.keykeeper.model.FileProvidedByTelegramUser
+import com.stacrux.keykeeper.model.TextRequestFromTelegram
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer
 import java.io.File
 
@@ -38,6 +38,7 @@ interface BotLifeStage : LongPollingSingleThreadUpdateConsumer {
         chatId: String,
         messageContent: String,
         asSpoiler: Boolean = false,
+        requiresMarkdown: Boolean = false,
         actionButtons: List<ActionButton> = listOf()
     ): Int
 

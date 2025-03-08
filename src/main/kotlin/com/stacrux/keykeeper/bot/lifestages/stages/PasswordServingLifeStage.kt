@@ -2,11 +2,13 @@ package com.stacrux.keykeeper.bot.lifestages.stages
 
 import com.stacrux.keykeeper.bot.lifestages.AbstractBotLifeStage
 import com.stacrux.keykeeper.bot.model.*
+import com.stacrux.keykeeper.model.ActionRequestFromTelegram
 import com.stacrux.keykeeper.model.CredentialEntry
+import com.stacrux.keykeeper.model.FileProvidedByTelegramUser
+import com.stacrux.keykeeper.model.TextRequestFromTelegram
 import com.stacrux.keykeeper.service.CredentialsService
 import com.stacrux.keykeeper.service.WebsiteParsingService
 import org.slf4j.LoggerFactory
-import java.util.concurrent.Executors
 
 
 class PasswordServingLifeStage(

@@ -43,7 +43,7 @@ tasks.test {
 }
 
 application {
-    mainClass.set("com.stacrux.keykeeper.Main")
+    mainClass.set("com.stacrux.keykeeper.MainKt")
 }
 
 tasks {

@@ -1,10 +1,10 @@
 package com.stacrux.keykeeper.bot.lifestages.stages
 
 import com.stacrux.keykeeper.bot.lifestages.AbstractBotLifeStage
-import com.stacrux.keykeeper.bot.model.ActionRequestFromTelegram
+import com.stacrux.keykeeper.model.ActionRequestFromTelegram
 import com.stacrux.keykeeper.bot.model.BotRunningState
-import com.stacrux.keykeeper.bot.model.FileProvidedByTelegramUser
-import com.stacrux.keykeeper.bot.model.TextRequestFromTelegram
+import com.stacrux.keykeeper.model.FileProvidedByTelegramUser
+import com.stacrux.keykeeper.model.TextRequestFromTelegram
 import com.stacrux.keykeeper.service.SessionService
 import org.apache.commons.lang3.RandomStringUtils
 import org.slf4j.LoggerFactory

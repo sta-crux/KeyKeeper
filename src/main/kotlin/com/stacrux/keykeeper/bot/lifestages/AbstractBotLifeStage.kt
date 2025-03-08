@@ -1,8 +1,9 @@
 package com.stacrux.keykeeper.bot.lifestages
 
-import ch.qos.logback.classic.pattern.MessageConverter
 import com.stacrux.keykeeper.ServiceProvider
-import com.stacrux.keykeeper.bot.model.*
+import com.stacrux.keykeeper.bot.helper.MessageConverter
+import com.stacrux.keykeeper.bot.model.ActionButton
+import com.stacrux.keykeeper.model.*
 import org.slf4j.LoggerFactory
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery
@@ -24,7 +25,7 @@ import java.util.concurrent.TimeUnit
  * Abstract class representing a bot life stage.
  * Extend this class to create specific life stages.
  */
-abstract class AbstractBotLifeStage(val botToken: String) : BotLifeStage {
+abstract class AbstractBotLifeStage(private val botToken: String) : BotLifeStage {
 
     private val logger = LoggerFactory.getLogger(AbstractBotLifeStage::class.java)
     private val telegramClient: TelegramClient = OkHttpTelegramClient(botToken)
@@ -32,8 +33,15 @@ abstract class AbstractBotLifeStage(val botToken: String) : BotLifeStage {
 
     override fun consume(update: Update) {
         logger.info("Received update: {}", update)
+
+        if (!canAnswerToUser(MessageConverter.getUserIdFromUpdate(update))) return
+        // parse only authorized requests
         val request = parseRequest(update) ?: return
-        if (!canAnswerToUser(request.userId)) return
+
+        if (request is MonitoringRequestFromTelegram) {
+            handleMonitoringRequest(request)
+            return
+        }
 
         when (request) {
             is ActionRequestFromTelegram -> {
@@ -41,16 +49,39 @@ abstract class AbstractBotLifeStage(val botToken: String) : BotLifeStage {
                 reactToActionRequest(request)
                 acknowledgeClick(request)
             }
+
             is FileProvidedByTelegramUser -> {
                 logger.info("Processing file request: {}", request)
                 reactToReceivedFile(request)
             }
+
             is TextRequestFromTelegram -> {
                 logger.info("Processing text request: {}", request)
                 reactToTextRequest(request)
             }
         }
     }
+
+    private fun handleMonitoringRequest(request: MonitoringRequestFromTelegram) {
+        val defaultMonitoringService = ServiceProvider.getDefaultMonitoringService()
+        when (request.monitoringRequest.requestType) {
+            MonitoringRequestFromTelegram.MonitoringRequest.MonitoringRequestType.COUNT -> {
+                val message = MessageConverter.formatMessageCount(defaultMonitoringService.receivedMessageCount())
+                sendMessage(chatId = request.chatId, message, requiresMarkdown = true)
+            }
+
+            MonitoringRequestFromTelegram.MonitoringRequest.MonitoringRequestType.REQUESTS -> {
+                val requestsByUserId =
+                    defaultMonitoringService.getMessagesByUserId(request.monitoringRequest.requestedUserId)
+                sendMessage(
+                    chatId = request.chatId,
+                    MessageConverter.formatRequests(requestsByUserId),
+                    requiresMarkdown = true
+                )
+            }
+        }
+    }
+
 
     /**
      * Acknowledge the interaction to make the animation stop in telegram
@@ -67,7 +98,7 @@ abstract class AbstractBotLifeStage(val botToken: String) : BotLifeStage {
     private fun parseRequest(update: Update): RequestFromTelegram? {
         return try {
             logger.debug("Parsing update to request")
-            MessageConverter().convertTelegramReceivedUpdate(update, botToken)
+            MessageConverter.convertTelegramReceivedUpdate(update, botToken)
         } catch (e: Exception) {
             logger.error("Failed to convert update to request", e)
             null
@@ -83,15 +114,30 @@ abstract class AbstractBotLifeStage(val botToken: String) : BotLifeStage {
         telegramClient.execute(sendDocument)
     }
 
-    override fun sendMessage(chatId: String, messageContent: String, asSpoiler: Boolean, actionButtons: List<ActionButton>): Int {
+    override fun sendMessage(
+        chatId: String,
+        messageContent: String,
+        asSpoiler: Boolean,
+        requiresMarkdown: Boolean,
+        actionButtons: List<ActionButton>
+    ): Int {
         require(chatId.isNotEmpty()) { "Chat Id cannot be empty" }
 
         val message = SendMessage.builder()
             .chatId(chatId)
-            .text(if (asSpoiler) "||${escapeMarkdownV2(messageContent)}||" else messageContent)
-            .apply { if (asSpoiler) parseMode("MarkdownV2") }
+            .text(
+                if (asSpoiler) {
+                    "||${escapeMarkdownV2(messageContent)}||"
+                } else if (requiresMarkdown) {
+                    escapeMarkdownV2(messageContent)
+                } else {
+                    messageContent
+                }
+            )
+            .apply { if (asSpoiler || requiresMarkdown) parseMode("MarkdownV2") }
             .replyMarkup(createInlineKeyboard(actionButtons))
             .build()
+
 
         return telegramClient.execute(message).messageId
     }
@@ -129,7 +175,7 @@ abstract class AbstractBotLifeStage(val botToken: String) : BotLifeStage {
     }
 
     private fun escapeMarkdownV2(text: String): String {
-        val specialChars = "_*[]()~`>#+-=|{}.!".toCharArray()
+        val specialChars = "_*[]()~>#+-=|{}.!".toCharArray()
         return text.map { if (it in specialChars) "\\$it" else it.toString() }.joinToString("")
     }
 }

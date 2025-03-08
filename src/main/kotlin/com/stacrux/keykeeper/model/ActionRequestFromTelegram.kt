@@ -1,4 +1,4 @@
-package com.stacrux.keykeeper.bot.model
+package com.stacrux.keykeeper.model
 
 class ActionRequestFromTelegram(
     chatId: String,
@@ -6,5 +6,4 @@ class ActionRequestFromTelegram(
     userName: String,
     val action: String,
     val actionIdentifier: String
-) : RequestFromTelegram(chatId, userId, userName) {
-}
+) : RequestFromTelegram(chatId, userId, userName)

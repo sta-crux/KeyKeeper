@@ -1,4 +1,4 @@
-package com.stacrux.keykeeper.bot.model
+package com.stacrux.keykeeper.model
 
 class TextRequestFromTelegram(
     chatId: String,
