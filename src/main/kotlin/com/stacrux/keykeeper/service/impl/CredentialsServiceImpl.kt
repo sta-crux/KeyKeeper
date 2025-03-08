@@ -13,8 +13,11 @@ class CredentialsServiceImpl(
     private var lastServed: List<CredentialEntry> = emptyList()
 
     override fun doesEntryExist(url: String): Boolean {
-        val host = webSiteExtractor.extractWebsiteIdentifier(url).wholeDomain
-        return credentialsManager.doesHostExist(host)
+        try {
+            return retrieveEntriesAssociatedToUrl(url).isNotEmpty()
+        } catch (e: Exception) {
+            return false
+        }
     }
 
     override fun insertEntry(url: String, userName: String, password: String) {

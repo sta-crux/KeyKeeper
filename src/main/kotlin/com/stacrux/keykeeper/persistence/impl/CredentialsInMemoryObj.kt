@@ -16,9 +16,10 @@ object CredentialsInMemoryObj : CredentialsManager {
     }
 
     override fun doesHostExist(host: String): Boolean {
+        val normalizedHost = host.lowercase() // Normalize input to lowercase
         return inMemoryCredentials
-            .map { it.host }
-            .contains(host)
+            .map { it.host.lowercase() }
+            .contains(normalizedHost)
     }
 
     override fun registerNewValue(credentialEntry: CredentialEntry) {

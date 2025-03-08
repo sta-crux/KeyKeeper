@@ -51,7 +51,6 @@ class PasswordServingLifeStage(
         val textContent = request.textContent
 
         when {
-            !websiteParsingService.isParseable(textContent) -> sendParsingErrorMessage(chatId)
             credentialsService.doesEntryExist(textContent) -> sendCredentialsMessage(chatId, textContent)
             else -> sendNoCredentialsMessage(chatId, textContent)
         }

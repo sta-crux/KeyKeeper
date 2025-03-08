@@ -1,6 +1,5 @@
 package com.stacrux.keykeeper.persistence
 
-import com.stacrux.keykeeper.ServiceProvider
 import com.stacrux.keykeeper.TestsSetup
 import com.stacrux.keykeeper.model.CredentialEntry
 import org.apache.commons.lang3.RandomStringUtils
