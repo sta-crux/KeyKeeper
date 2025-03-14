@@ -1,4 +1,4 @@
-package com.stacrux.keykeeper.bot.lifestages.stages
+package com.stacrux.keykeeper.bot.lifestages.stages.servingpassword
 
 import com.stacrux.keykeeper.bot.lifestages.AbstractBotLifeStage
 import com.stacrux.keykeeper.bot.model.*
@@ -20,17 +20,9 @@ class PasswordServingLifeStage(
     AbstractBotLifeStage(token) {
 
     private val logger = LoggerFactory.getLogger(PasswordServingLifeStage::class.java)
-    private val addActionIdentifier = "add_credential_entry"
-    private val backUpActionIdentifier = "backup_credentials"
-    private val backUpOptionsLabel = "\uD83D\uDCE6 Backup options"
-    private val primaryActions = listOf(
-        ActionButton(buttonText = "\uD83D\uDD0F Add new credentials", actionIdentifier = addActionIdentifier),
-        ActionButton(buttonText = backUpOptionsLabel, actionIdentifier = backUpActionIdentifier)
-    )
-    private val copyModeActionIdentifier = "copy_mode"
-    private val actionsOnSecretMessage = listOf(
-        ActionButton(buttonText = "Copy mode", copyModeActionIdentifier)
-    )
+    private val primaryActions = AddOrBackUpButtons
+    private val actionsOnSecretMessage = SendCopyableButtons
+
 
     private var lastCredentialsMessageId: Int = -1
 
@@ -102,15 +94,15 @@ class PasswordServingLifeStage(
 
     override fun reactToActionRequest(request: ActionRequestFromTelegram) {
         logger.info("Received action ${request.action} from userId ${request.userId}")
-        if (request.action == addActionIdentifier) {
+        if (request.action == primaryActions.getAddActionIdentifier()) {
             getKeyKeeper().advanceBotLifeStage(chatId, BotRunningState.ADD_CREDENTIALS)
             return
         }
-        if (request.action == backUpActionIdentifier) {
+        if (request.action == primaryActions.getBackUpActionIdentifier()) {
             getKeyKeeper().advanceBotLifeStage(chatId, BotRunningState.BACKUP)
             return
         }
-        if (request.action == copyModeActionIdentifier && lastCredentialsMessageId == request.messageId) {
+        if (request.action == actionsOnSecretMessage.getCopyModeActionIdentifier() && lastCredentialsMessageId == request.messageId) {
             val clearContent = formatCredentialsAsCopyableYaml(credentialsService.getLastServedCredentials())
             editMessage(chatId = chatId, messageId = request.messageId, clearContent, true, 0)
             return
@@ -121,7 +113,7 @@ class PasswordServingLifeStage(
     override fun reactToReceivedFile(request: FileProvidedByTelegramUser) {
         sendMessage(
             chatId,
-            "Sorry, I cannot process the file, if you want to restore backup click first on ($backUpOptionsLabel)",
+            "Sorry, I cannot process the file, if you want to restore backup click first on (${primaryActions.getBackUpActionLabel()})",
             actionButtons = primaryActions
         )
 
@@ -131,7 +123,7 @@ class PasswordServingLifeStage(
         return buildString {
             entries.forEach { entry ->
                 val host = entry.host
-                val username = entry.username ?: "n/a"
+                val username = entry.username
                 val password = entry.password
                 append("\uD83C\uDFE0 host: $host\n")
                 append("\uD83D\uDC65 login: $username\n")
@@ -145,7 +137,7 @@ class PasswordServingLifeStage(
         return buildString {
             entries.forEach { entry ->
                 val host = entry.host
-                val username = entry.username ?: "n/a"
+                val username = entry.username
                 val password = entry.password
                 append("\uD83C\uDFE0 host: $host\n")
                 append("\uD83D\uDC65 login: `$username`\n")

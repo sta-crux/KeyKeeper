@@ -1,4 +1,4 @@
-package com.stacrux.keykeeper.bot.lifestages.stages
+package com.stacrux.keykeeper.bot.lifestages.stages.restoresession
 
 import com.stacrux.keykeeper.bot.lifestages.AbstractBotLifeStage
 import com.stacrux.keykeeper.bot.model.*
@@ -14,17 +14,13 @@ class RestoreSessionLifeStage(
     botToken: String,
     val chatId: String,
     private val credentialsService: CredentialsService,
-    val sessionService: SessionService,
+    private val sessionService: SessionService,
     private val backUpService: BackUpService,
     private var backUpFile: File?
 ) :
     AbstractBotLifeStage(botToken) {
 
-    private val forgetSessionLabel = "\uD83D\uDDD1\uFE0F Ignore previous data"
-    private val forgetSessionActionId = "forget_prev_session"
-    private val primaryActions = listOf(
-        ActionButton(buttonText = forgetSessionLabel, actionIdentifier = forgetSessionActionId)
-    )
+    private val primaryActions = ForgetPreviousSession
 
     init {
         defaultMessage()
@@ -65,7 +61,7 @@ class RestoreSessionLifeStage(
 
 
     override fun reactToActionRequest(request: ActionRequestFromTelegram) {
-        if (request.action == forgetSessionActionId) {
+        if (request.action == primaryActions.getForgetSessionActionId()) {
             sendMessage(
                 chatId,
                 "Alright, I'll ignore the previous session and stop storing backups, " +

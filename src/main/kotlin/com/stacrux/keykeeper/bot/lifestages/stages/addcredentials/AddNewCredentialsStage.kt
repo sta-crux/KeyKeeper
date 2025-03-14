@@ -1,4 +1,4 @@
-package com.stacrux.keykeeper.bot.lifestages.stages
+package com.stacrux.keykeeper.bot.lifestages.stages.addcredentials
 
 import com.stacrux.keykeeper.bot.lifestages.AbstractBotLifeStage
 import com.stacrux.keykeeper.bot.model.*
@@ -18,17 +18,11 @@ class AddNewCredentialsStage(
 
     private val logger = LoggerFactory.getLogger(AddNewCredentialsStage::class.java)
 
-    private val abandonActionIdentifier = "abandon_action"
-    private val startOverActionIdentifier = "start_over"
-
     private var newEntryUrl: String? = null
     private var newEntryUserName: String? = null
     private var newEntryPassword: String? = null
 
-    private val actions = listOf(
-        ActionButton("\uD83D\uDD19 Go back", abandonActionIdentifier),
-        ActionButton("⏪ Start over", startOverActionIdentifier),
-    )
+    private val actions = AbandonOrRestart
 
     init {
         promptForWebsite()
@@ -45,8 +39,8 @@ class AddNewCredentialsStage(
 
     override fun reactToActionRequest(request: ActionRequestFromTelegram) {
         when (request.action) {
-            startOverActionIdentifier -> restartEntry()
-            abandonActionIdentifier -> abandonProcess()
+            actions.getRestartActionIdentifier()-> restartEntry()
+            actions.getAbandonActionIdentifier() -> abandonProcess()
             else -> sendMessage(
                 request.chatId,
                 "Sorry, that button does not work in this context",
@@ -64,7 +58,7 @@ class AddNewCredentialsStage(
     }
 
     private fun processWebsite(textContent: String) {
-        val processedUrl = try {
+        try {
             websiteParsingService.extractWebsiteIdentifier(textContent)
         } catch (e: Exception) {
             sendMessage(chatId, "I could not understand that URL, can you try another way?", actionButtons = actions)
