@@ -2,6 +2,10 @@ package com.stacrux.keykeeper.bot
 
 import com.stacrux.keykeeper.ServiceProvider
 import com.stacrux.keykeeper.bot.lifestages.stages.*
+import com.stacrux.keykeeper.bot.lifestages.stages.addcredentials.AddNewCredentialsStage
+import com.stacrux.keykeeper.bot.lifestages.stages.backupstage.BackUpLifeStage
+import com.stacrux.keykeeper.bot.lifestages.stages.restoresession.RestoreSessionLifeStage
+import com.stacrux.keykeeper.bot.lifestages.stages.servingpassword.PasswordServingLifeStage
 import com.stacrux.keykeeper.bot.model.BotRunningState
 import org.slf4j.LoggerFactory
 import org.telegram.telegrambots.longpolling.BotSession

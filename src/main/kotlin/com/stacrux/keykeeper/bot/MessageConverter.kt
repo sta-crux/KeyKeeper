@@ -1,4 +1,4 @@
-package com.stacrux.keykeeper.bot.helper
+package com.stacrux.keykeeper.bot
 
 import com.stacrux.keykeeper.ServiceProvider
 import com.stacrux.keykeeper.model.*

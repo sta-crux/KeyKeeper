@@ -1,4 +1,4 @@
-package com.stacrux.keykeeper.bot.lifestages.stages
+package com.stacrux.keykeeper.bot.lifestages.stages.backupstage
 
 import com.stacrux.keykeeper.bot.lifestages.AbstractBotLifeStage
 import com.stacrux.keykeeper.bot.model.*
@@ -22,19 +22,7 @@ class BackUpLifeStage(
     AbstractBotLifeStage(token) {
 
     private val logger = LoggerFactory.getLogger(BackUpLifeStage::class.java)
-
-    private val abandonActionIdentifier = "abandon_action"
-    private val backUpActionIdentifier = "backup_credentials"
-    private val backUpActionLabel = "\uD83D\uDCBE Perform backup"
-    private val toggleStatefulMode = "stateful_toggle"
-    private val primaryActions = listOf(
-        ActionButton("\uD83D\uDD19 Go back", abandonActionIdentifier),
-        ActionButton(buttonText = backUpActionLabel, actionIdentifier = backUpActionIdentifier),
-        ActionButton(
-            buttonText = "\uD83D\uDDC4\uFE0F Enable/Disable bot local backup",
-            actionIdentifier = toggleStatefulMode
-        ),
-    )
+    private val primaryActions = AbandonOrBackUpOrToggleAutoBackUp
 
     private var receivedPasswordsBackup: File? = null
 
@@ -72,9 +60,9 @@ class BackUpLifeStage(
 
     override fun reactToActionRequest(request: ActionRequestFromTelegram) {
         when (request.action) {
-            backUpActionIdentifier -> sendBackup(request)
-            abandonActionIdentifier -> abandonProcess()
-            toggleStatefulMode -> toggleLocalBackUps()
+            primaryActions.getBackUpActionIdentifier() -> sendBackup(request)
+            primaryActions.getAbandonActionIdentifier() -> abandonProcess()
+            primaryActions.getToggleStatefulModeActionIdentifier() -> toggleLocalBackUps()
             else -> sendMessage(
                 request.chatId,
                 "Sorry, that button does not work in this context",
@@ -160,7 +148,7 @@ class BackUpLifeStage(
     private fun defaultMessage() {
         sendMessage(
             chatId,
-            "When you click [$backUpActionLabel] I will send you a backup file (protected by a password), " +
+            "When you click [${primaryActions.getBackUpActionLabel()}] I will send you a backup file (protected by a password), " +
                     "along with the password I have used to lock it (in a separate message). " +
                     "If the local bot backup feature is active, I'll save the backup on my end as well, in case of " +
                     "problems I might ask you to provide me the password to unlock it." +

@@ -3,6 +3,7 @@ package com.stacrux.keykeeper.bot.lifestages
 import com.stacrux.keykeeper.ServiceProvider
 import com.stacrux.keykeeper.bot.KeyKeeper
 import com.stacrux.keykeeper.bot.model.ActionButton
+import com.stacrux.keykeeper.bot.model.ActionsButtons
 import com.stacrux.keykeeper.model.ActionRequestFromTelegram
 import com.stacrux.keykeeper.model.FileProvidedByTelegramUser
 import com.stacrux.keykeeper.model.TextRequestFromTelegram
@@ -39,7 +40,7 @@ interface BotLifeStage : LongPollingSingleThreadUpdateConsumer {
         messageContent: String,
         asSpoiler: Boolean = false,
         requiresMarkdown: Boolean = false,
-        actionButtons: List<ActionButton> = listOf()
+        actionButtons: ActionsButtons = ActionsButtons.EmptyActionButtons
     ): Int
 
     /**

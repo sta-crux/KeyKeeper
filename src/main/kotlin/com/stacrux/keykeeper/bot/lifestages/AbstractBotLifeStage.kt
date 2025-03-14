@@ -1,8 +1,9 @@
 package com.stacrux.keykeeper.bot.lifestages
 
 import com.stacrux.keykeeper.ServiceProvider
-import com.stacrux.keykeeper.bot.helper.MessageConverter
+import com.stacrux.keykeeper.bot.MessageConverter
 import com.stacrux.keykeeper.bot.model.ActionButton
+import com.stacrux.keykeeper.bot.model.ActionsButtons
 import com.stacrux.keykeeper.model.*
 import org.slf4j.LoggerFactory
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient
@@ -119,7 +120,7 @@ abstract class AbstractBotLifeStage(private val botToken: String) : BotLifeStage
         messageContent: String,
         asSpoiler: Boolean,
         requiresMarkdown: Boolean,
-        actionButtons: List<ActionButton>
+        actionButtons: ActionsButtons
     ): Int {
         require(chatId.isNotEmpty()) { "Chat Id cannot be empty" }
 
@@ -135,7 +136,7 @@ abstract class AbstractBotLifeStage(private val botToken: String) : BotLifeStage
                 }
             )
             .apply { if (asSpoiler || requiresMarkdown) parseMode("MarkdownV2") }
-            .replyMarkup(createInlineKeyboard(actionButtons))
+            .replyMarkup(createInlineKeyboard(actionButtons.asActionButtonsList()))
             .build()
 
 
