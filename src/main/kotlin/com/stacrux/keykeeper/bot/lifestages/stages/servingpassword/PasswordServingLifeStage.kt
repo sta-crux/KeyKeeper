@@ -9,6 +9,8 @@ import com.stacrux.keykeeper.model.TextRequestFromTelegram
 import com.stacrux.keykeeper.service.CredentialsService
 import com.stacrux.keykeeper.service.WebsiteParsingService
 import org.slf4j.LoggerFactory
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 
 class PasswordServingLifeStage(
@@ -21,60 +23,64 @@ class PasswordServingLifeStage(
 
     private val logger = LoggerFactory.getLogger(PasswordServingLifeStage::class.java)
     private val primaryActions = AddOrBackUpButtons
-    private val actionsOnSecretMessage = SendCopyableButtons
 
+    private class RecordedSharedCredentials(
+        val messageId: Int,
+        val proposedActions: SendCopyableOrDeleteButtons,
+        val timestamp: Instant
+    )
 
-    private var lastCredentialsMessageId: Int = -1
+    private val actionsOnSecretMessages: MutableList<RecordedSharedCredentials> = mutableListOf()
 
     init {
         logger.info("Starting PasswordServingBot")
-        if (credentialsService.getAllCredentials().isEmpty()) {
-            val message =
-                "[\uD83D\uDECE\uFE0F Serving mode]\n You have zero credentials stored, you can add some clicking below \uD83D\uDC47"
-            sendMessage(chatId, message, actionButtons = primaryActions)
+        val message = if (credentialsService.getAllCredentials().isEmpty()) {
+            "📭 *Empty Vault*\n\nNo credentials stored yet! Tap below to add your first one ⬇️"
         } else {
-            val message =
-                "[\uD83D\uDECE\uFE0F Serving mode]\nDirectly paste the websites and hit send to get your credentials!"
-            sendMessage(chatId, message, actionButtons = primaryActions)
+            "🔑 *Password Vault Ready*\n\nPaste any URL and hit send to retrieve your credentials! ⚡"
         }
+        sendMessage(chatId, message, actionButtons = primaryActions)
     }
+
 
     override fun reactToTextRequest(request: TextRequestFromTelegram) {
         val textContent = request.textContent
         if (credentialsService.doesEntryExist(textContent)) {
-            sendCredentialsMessage(chatId, textContent)
+            logger.info("Found some matches!")
+            val entries = credentialsService.retrieveEntriesAssociatedToUrl(textContent)
+            val timeBeforeRedact = 5
+            sendMessage(
+                chatId, "I've found ${entries.size} credentials \uD83D\uDE80\n" +
+                        "You can find the matching passwords below. For security purposes, the content will redacted " +
+                        "in $timeBeforeRedact minutes \uD83D\uDD76\uFE0F"
+            )
+            timeBeforeRedact.sendCredentialsMessage(chatId, entries)
             return
         }
         sendNoCredentialsMessage(chatId, textContent)
     }
 
-    private fun sendParsingErrorMessage(chatId: String) {
-        sendMessage(
-            chatId,
-            "I cannot process this... try another URL?",
-            actionButtons = primaryActions
-        )
+    private fun Int.sendCredentialsMessage(chatId: String, entries: List<CredentialEntry>) {
+
+        entries.forEach {
+            val formattedMessage = formatCredentialsAsYaml(listOf(it))
+            val actionsButtons = SendCopyableOrDeleteButtons(it)
+            val messageId = sendMessage(chatId, formattedMessage, asSpoiler = true, actionButtons = actionsButtons)
+            recordMessageForFutureInteractions(messageId, actionsButtons)
+            editMessage(
+                chatId,
+                messageId,
+                "Nothing to see here \uD83E\uDD77\uD83C\uDFFC",
+                false,
+                this
+            )
+        }
     }
 
-    private fun sendCredentialsMessage(chatId: String, textContent: String) {
-        logger.info("Found some matches!")
-        val entries = credentialsService.retrieveEntriesAssociatedToUrl(textContent)
-        if (entries.isEmpty()) {
-            return
-        }
-        val timeIntervalToModify = 1;
-        var formattedMessage = "Your saved passwords for this website are below, the content will disappear " +
-                "in $timeIntervalToModify minutes\n"
-        formattedMessage += formatCredentialsAsYaml(entries)
-        val messageId = sendMessage(chatId, formattedMessage, asSpoiler = true, actionButtons = actionsOnSecretMessage)
-        lastCredentialsMessageId = messageId
-        editMessage(
-            chatId,
-            messageId,
-            "Nothing to see here \uD83E\uDD77\uD83C\uDFFC",
-            false,
-            timeIntervalToModify
-        )
+    private fun recordMessageForFutureInteractions(messageId: Int, actionsButtons: SendCopyableOrDeleteButtons) {
+        actionsOnSecretMessages.add(RecordedSharedCredentials(messageId, actionsButtons, Instant.now()))
+        // perform some cleanup
+        actionsOnSecretMessages.removeIf { it.timestamp.isBefore(Instant.now().minus(1, ChronoUnit.DAYS)) }
     }
 
     private fun sendNoCredentialsMessage(chatId: String, textContent: String) {
@@ -102,9 +108,17 @@ class PasswordServingLifeStage(
             getKeyKeeper().advanceBotLifeStage(chatId, BotRunningState.BACKUP)
             return
         }
-        if (request.action == actionsOnSecretMessage.getCopyModeActionIdentifier() && lastCredentialsMessageId == request.messageId) {
-            val clearContent = formatCredentialsAsCopyableYaml(credentialsService.getLastServedCredentials())
-            editMessage(chatId = chatId, messageId = request.messageId, clearContent, true, 0)
+        if ((request.action == SendCopyableOrDeleteButtons.getCopyModeActionIdentifier())) {
+            val retrievedAction = actionsOnSecretMessages.find { it.messageId == request.messageId } ?: return
+            val clearContent = formatCredentialsAsCopyableYaml(listOf(retrievedAction.proposedActions.credential))
+            editMessage(chatId = chatId, messageId = request.messageId, clearContent, true)
+            return
+        }
+        if ((request.action == SendCopyableOrDeleteButtons.getDeleteActionIdentifier())) {
+            val retrievedAction = actionsOnSecretMessages.find { it.messageId == request.messageId } ?: return
+            credentialsService.removeCredentials(retrievedAction.proposedActions.credential)
+            this.actionsOnSecretMessages.removeIf { it.messageId == request.messageId }
+            editMessage(chatId, request.messageId, "These credentials have been deleted...")
             return
         }
         sendMessage(chatId, "Sorry, that button does not work in this context", actionButtons = primaryActions)
@@ -113,39 +127,36 @@ class PasswordServingLifeStage(
     override fun reactToReceivedFile(request: FileProvidedByTelegramUser) {
         sendMessage(
             chatId,
-            "Sorry, I cannot process the file, if you want to restore backup click first on (${primaryActions.getBackUpActionLabel()})",
+            "Sorry, I cannot process the file in this context, " +
+                    "if you want to restore backup click first on (${primaryActions.getBackUpActionLabel()})",
             actionButtons = primaryActions
         )
 
     }
 
-    private fun formatCredentialsAsYaml(entries: List<CredentialEntry>): String {
+    private fun formatCredentials(entries: List<CredentialEntry>, copyable: Boolean = false): String {
+        val hostEmoji = "\uD83C\uDFE0"
+        val loginEmoji = "\uD83D\uDC65"
+        val secretEmoji = "\uD83D\uDD12"
+
         return buildString {
             entries.forEach { entry ->
-                val host = entry.host
-                val username = entry.username
-                val password = entry.password
-                append("\uD83C\uDFE0 host: $host\n")
-                append("\uD83D\uDC65 login: $username\n")
-                append("\uD83D\uDD12 secret: $password\n")
+                append("$hostEmoji host: ${entry.host}\n")
+                append("$loginEmoji login: ${if (copyable) "`${entry.username}`" else entry.username}\n")
+                append("$secretEmoji secret: ${if (copyable) "`${entry.password}`" else entry.password}\n")
                 append("\n")
             }
         }
     }
 
-    private fun formatCredentialsAsCopyableYaml(entries: List<CredentialEntry>): String {
-        return buildString {
-            entries.forEach { entry ->
-                val host = entry.host
-                val username = entry.username
-                val password = entry.password
-                append("\uD83C\uDFE0 host: $host\n")
-                append("\uD83D\uDC65 login: `$username`\n")
-                append("\uD83D\uDD12 secret: `$password`\n")
-                append("\n")
-            }
-        }
+    private fun formatCredentialsAsYaml(entries: List<CredentialEntry>): String {
+        return formatCredentials(entries)
     }
+
+    private fun formatCredentialsAsCopyableYaml(entries: List<CredentialEntry>): String {
+        return formatCredentials(entries, copyable = true)
+    }
+
 
 
 }

@@ -8,4 +8,5 @@ interface CredentialsManager {
     fun doesHostExist(host: String): Boolean
     fun registerNewValue(credentialEntry: CredentialEntry)
     fun getAll(): List<CredentialEntry>
+    fun removeCredentials(credentialEntry: CredentialEntry)
 }

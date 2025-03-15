@@ -4,13 +4,14 @@ import com.stacrux.keykeeper.model.CredentialEntry
 import com.stacrux.keykeeper.persistence.CredentialsManager
 import com.stacrux.keykeeper.service.CredentialsService
 import com.stacrux.keykeeper.service.WebsiteParsingService
+import org.slf4j.LoggerFactory
 
 class CredentialsServiceImpl(
     private val credentialsManager: CredentialsManager,
     private val webSiteExtractor: WebsiteParsingService
 ) : CredentialsService {
 
-    private var lastServed: List<CredentialEntry> = emptyList()
+    private val logger = LoggerFactory.getLogger(CredentialsServiceImpl::class.java)
 
     override fun doesEntryExist(url: String): Boolean {
         return try {
@@ -45,7 +46,6 @@ class CredentialsServiceImpl(
                 matches.addAll(credentialsForHost)
             }
         }
-        lastServed = matches.toList()
         return matches.toList()
     }
 
@@ -53,7 +53,11 @@ class CredentialsServiceImpl(
         return credentialsManager.getAll()
     }
 
-    override fun getLastServedCredentials(): List<CredentialEntry> {
-        return lastServed
+    override fun removeCredentials(credentials: CredentialEntry) {
+        try {
+            credentialsManager.removeCredentials(credentials)
+        } catch (e: Exception) {
+            logger.error("I could not delete credentials $credentials", e)
+        }
     }
 }

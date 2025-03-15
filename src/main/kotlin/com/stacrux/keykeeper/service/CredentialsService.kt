@@ -12,6 +12,6 @@ interface CredentialsService {
     fun insertEntries(credentials: List<CredentialEntry>)
     fun retrieveEntriesAssociatedToUrl(url: String): List<CredentialEntry>
     fun getAllCredentials(): List<CredentialEntry>
-    fun getLastServedCredentials(): List<CredentialEntry>
+    fun removeCredentials(credentials: CredentialEntry)
 
 }

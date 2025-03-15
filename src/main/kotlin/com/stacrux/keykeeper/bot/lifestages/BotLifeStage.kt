@@ -55,7 +55,7 @@ interface BotLifeStage : LongPollingSingleThreadUpdateConsumer {
         messageId: Int,
         newContent: String,
         requiresMarkdown: Boolean = false,
-        editAfterMinutes: Int
+        editAfterMinutes: Int = 0 // by default instantly edit
     )
 
     /**

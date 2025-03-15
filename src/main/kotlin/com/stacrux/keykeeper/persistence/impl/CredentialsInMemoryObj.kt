@@ -34,4 +34,11 @@ object CredentialsInMemoryObj : CredentialsManager {
         return inMemoryCredentials.toList()
     }
 
+    override fun removeCredentials(credentialEntry: CredentialEntry) {
+        inMemoryCredentials.removeIf {
+            it.host == credentialEntry.host &&
+                    it.username == credentialEntry.username
+        }
+    }
+
 }
