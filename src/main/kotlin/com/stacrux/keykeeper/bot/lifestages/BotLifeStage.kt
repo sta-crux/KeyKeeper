@@ -2,7 +2,6 @@ package com.stacrux.keykeeper.bot.lifestages
 
 import com.stacrux.keykeeper.ServiceProvider
 import com.stacrux.keykeeper.bot.KeyKeeper
-import com.stacrux.keykeeper.bot.model.ActionButton
 import com.stacrux.keykeeper.bot.model.ActionsButtons
 import com.stacrux.keykeeper.model.ActionRequestFromTelegram
 import com.stacrux.keykeeper.model.FileProvidedByTelegramUser
@@ -33,14 +32,15 @@ interface BotLifeStage : LongPollingSingleThreadUpdateConsumer {
      * @param chatId identifies the chat that will receive the message
      * @param asSpoiler when true, send a spoiler message (concealed unless clicked)
      * @param actionButtons list of buttons that are displayed after the message is sent
+     * @param deleteAfterMinutes only when greater than 0, the message will be deleted after the provided amount of time
      * @returns the message id of the sent message
      */
     fun sendMessage(
         chatId: String,
         messageContent: String,
         asSpoiler: Boolean = false,
-        requiresMarkdown: Boolean = false,
-        actionButtons: ActionsButtons = ActionsButtons.EmptyActionButtons
+        actionButtons: ActionsButtons = ActionsButtons.EmptyActionButtons,
+        deleteAfterMinutes: Int = 0
     ): Int
 
     /**
@@ -54,8 +54,7 @@ interface BotLifeStage : LongPollingSingleThreadUpdateConsumer {
         chatId: String,
         messageId: Int,
         newContent: String,
-        requiresMarkdown: Boolean = false,
-        editAfterMinutes: Int = 0 // by default instantly edit
+        editAfterMinutes: Int = 0 // by default instantly edit){}
     )
 
     /**

@@ -50,9 +50,9 @@ class PasswordServingLifeStage(
             val entries = credentialsService.retrieveEntriesAssociatedToUrl(textContent)
             val timeBeforeRedact = 5
             sendMessage(
-                chatId, "I've found ${entries.size} credentials \uD83D\uDE80\n" +
+                chatId, "I've found ${entries.size} match(es) \uD83D\uDE80\n" +
                         "You can find the matching passwords below. For security purposes, the content will redacted " +
-                        "in $timeBeforeRedact minutes \uD83D\uDD76\uFE0F"
+                        "in $timeBeforeRedact minutes \uD83D\uDD76\uFE0F", deleteAfterMinutes = timeBeforeRedact
             )
             timeBeforeRedact.sendCredentialsMessage(chatId, entries)
             return
@@ -71,7 +71,6 @@ class PasswordServingLifeStage(
                 chatId,
                 messageId,
                 "Nothing to see here \uD83E\uDD77\uD83C\uDFFC",
-                false,
                 this
             )
         }
@@ -111,7 +110,7 @@ class PasswordServingLifeStage(
         if ((request.action == SendCopyableOrDeleteButtons.getCopyModeActionIdentifier())) {
             val retrievedAction = actionsOnSecretMessages.find { it.messageId == request.messageId } ?: return
             val clearContent = formatCredentialsAsCopyableYaml(listOf(retrievedAction.proposedActions.credential))
-            editMessage(chatId = chatId, messageId = request.messageId, clearContent, true)
+            editMessage(chatId = chatId, messageId = request.messageId, clearContent)
             return
         }
         if ((request.action == SendCopyableOrDeleteButtons.getDeleteActionIdentifier())) {
@@ -156,7 +155,6 @@ class PasswordServingLifeStage(
     private fun formatCredentialsAsCopyableYaml(entries: List<CredentialEntry>): String {
         return formatCredentials(entries, copyable = true)
     }
-
 
 
 }

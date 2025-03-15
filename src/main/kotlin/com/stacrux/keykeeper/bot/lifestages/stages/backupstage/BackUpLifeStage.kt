@@ -76,15 +76,13 @@ class BackUpLifeStage(
             sessionService.createSession(chatId)
         }
 
-        val isStoring = sessionService.isStoringBackUps()
-        val newIsStoring = !isStoring
+        val newIsStoring = !sessionService.isStoringBackUps()
         sessionService.toggleLocalBackUpStoring(newIsStoring)
 
         val message = if (newIsStoring) {
-            "[\uD83D\uDD34 Local backup disabled] I will only send you the backup files without keeping any copy on my end."
+            "🟢 *Local Backup Enabled*\n\nEvery time you create a backup, a copy will be stored securely on my side. If I reboot, you'll need to provide the password to unlock it."
         } else {
-            "[\uD83D\uDFE2 Local backup enabled] Every time you create a backup, a copy will be registered on my end as well. " +
-                    "If I reboot, you'll have to send the password to unlock it."
+            "🔴 *Local Backup Disabled*\n\nFrom now on, I'll only send you the backup files — no copies will be kept on my end."
         }
 
         sendMessage(chatId, message, actionButtons = primaryActions)
@@ -123,10 +121,13 @@ class BackUpLifeStage(
     private fun sendBackup(request: ActionRequestFromTelegram) {
         val encryptionKey = RandomStringUtils.randomAlphanumeric(16)
         val backUpTag = RandomStringUtils.randomAlphanumeric(16)
+        val timeBeforeDelete = 10
         sendMessage(
-            request.chatId, "Store this secret in your Saved Messages, then delete it from here.\n" +
+            request.chatId,
+            "Store this secret in your Saved Messages, I'll delete it from here in ${timeBeforeDelete}.\n" +
                     "\uD83C\uDFF7\uFE0F backup file tag: `$backUpTag`\n" +
-                    "\uD83D\uDD11 backup file password: `$encryptionKey`", requiresMarkdown = true
+                    "\uD83D\uDD11 backup file password: `$encryptionKey`",
+            deleteAfterMinutes = timeBeforeDelete
         )
         val backUpFile = backUpService.createBackUpFile(
             credentialsService.getAllCredentials(),
@@ -141,20 +142,31 @@ class BackUpLifeStage(
     }
 
     private fun abandonProcess() {
-        logger.info("Sure! Back to serving known passwords")
         getKeyKeeper().advanceBotLifeStage(chatId, BotRunningState.SERVING)
     }
 
     private fun defaultMessage() {
+        val isLocalBackupEnabled = if (sessionService.isStoringBackUps()) "🟢 *Enabled*" else "🔴 *Disabled*"
+
         sendMessage(
             chatId,
-            "When you click [${primaryActions.getBackUpActionLabel()}] I will send you a backup file (protected by a password), " +
-                    "along with the password I have used to lock it (in a separate message). " +
-                    "If the local bot backup feature is active, I'll save the backup on my end as well, in case of " +
-                    "problems I might ask you to provide me the password to unlock it." +
-                    "\nIf you want to import an old file, you can send me one and I'll import it." +
-                    "\nA backup file is a zip wrapping a CSV, containing 3 columns: host, username, password.",
+            """
+        📦 *Backup & Import Guide*  
+        
+        🛡️ Click *[${primaryActions.getBackUpActionLabel()}]* to receive a backup file (password-protected), along with the password in a separate message.  
+        
+        🔐 *Local Backup:* $isLocalBackupEnabled  
+        If enabled, I’ll securely store a copy of each backup on my side too. In case of issues, I might ask you for the password to unlock it.  
+        
+        📥 Want to import an old backup? Just send me the file, and I’ll take care of it!  
+        
+        📋 *Backup Structure*:  
+        Each backup is a ZIP containing a CSV with 3 columns: `host`, `username`, `password`.
+        """.trimIndent(),
             actionButtons = primaryActions
         )
     }
+
+
+
 }

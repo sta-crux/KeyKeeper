@@ -101,14 +101,18 @@ class RestoreSessionLifeStage(
     }
 
     private fun defaultMessage() {
-        var message = "\uD83D\uDE16 KeyKeeper has restarted...\n"
-        if (backUpFile == null) {
-            message += "I have no valid backup on my end, please send me a backup copy if you want me to import all your credentials."
-        } else {
-            val backUpTag = sessionService.retrieveLastKnownBackUpTag()
-            message += "I found a backup with tag \uD83C\uDFF7\uFE0F:[$backUpTag], " +
-                    "I need the key \uD83D\uDD11 to restore the backup file, can you share it?"
+        val message = buildString {
+            append("⚡ *KeyKeeper has restarted...*\n\n")
+            if (backUpFile == null) {
+                append("❌ No backup found on my end.\n")
+                append("📤 Please send me a backup file if you’d like me to restore your credentials.")
+            } else {
+                val backUpTag = sessionService.retrieveLastKnownBackUpTag()
+                append("✅ Backup detected! 🏷️ *Tag*: `$backUpTag`\n")
+                append("🔑 I’ll need the key to unlock it — could you share it?")
+            }
         }
         sendMessage(chatId, message, actionButtons = primaryActions)
     }
+
 }

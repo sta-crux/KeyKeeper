@@ -10,6 +10,7 @@ import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText
 import org.telegram.telegrambots.meta.api.objects.InputFile
 import org.telegram.telegrambots.meta.api.objects.Update
@@ -68,7 +69,7 @@ abstract class AbstractBotLifeStage(private val botToken: String) : BotLifeStage
         when (request.monitoringRequest.requestType) {
             MonitoringRequestFromTelegram.MonitoringRequest.MonitoringRequestType.COUNT -> {
                 val message = MessageConverter.formatMessageCount(defaultMonitoringService.receivedMessageCount())
-                sendMessage(chatId = request.chatId, message, requiresMarkdown = true)
+                sendMessage(chatId = request.chatId, message)
             }
 
             MonitoringRequestFromTelegram.MonitoringRequest.MonitoringRequestType.REQUESTS -> {
@@ -76,8 +77,7 @@ abstract class AbstractBotLifeStage(private val botToken: String) : BotLifeStage
                     defaultMonitoringService.getMessagesByUserId(request.monitoringRequest.requestedUserId)
                 sendMessage(
                     chatId = request.chatId,
-                    MessageConverter.formatRequests(requestsByUserId),
-                    requiresMarkdown = true
+                    MessageConverter.formatRequests(requestsByUserId)
                 )
             }
         }
@@ -119,35 +119,37 @@ abstract class AbstractBotLifeStage(private val botToken: String) : BotLifeStage
         chatId: String,
         messageContent: String,
         asSpoiler: Boolean,
-        requiresMarkdown: Boolean,
-        actionButtons: ActionsButtons
+        actionButtons: ActionsButtons,
+        deleteAfterMinutes: Int
     ): Int {
         require(chatId.isNotEmpty()) { "Chat Id cannot be empty" }
 
+        val escapedMessage = escapeMarkdownV2(messageContent)
         val message = SendMessage.builder()
             .chatId(chatId)
-            .text(
-                if (asSpoiler) {
-                    "||${escapeMarkdownV2(messageContent)}||"
-                } else if (requiresMarkdown) {
-                    escapeMarkdownV2(messageContent)
-                } else {
-                    messageContent
-                }
-            )
-            .apply { if (asSpoiler || requiresMarkdown) parseMode("MarkdownV2") }
+            .text(if (asSpoiler) "||${escapedMessage}||" else escapedMessage)
+            .apply { parseMode("MarkdownV2") }
             .replyMarkup(createInlineKeyboard(actionButtons.asActionButtonsList()))
             .build()
 
-
-        return telegramClient.execute(message).messageId
+        val messageId = telegramClient.execute(message).messageId
+        if (deleteAfterMinutes > 0) {
+            scheduler.schedule({
+                try {
+                    logger.info("Deleting message {} in chat {}", messageId, chatId)
+                    deleteMessage(chatId, messageId)
+                } catch (t: Throwable) {
+                    logger.error("I could not delete message with id {} in chat {}", messageId, chatId)
+                }
+            }, deleteAfterMinutes.toLong(), TimeUnit.MINUTES)
+        }
+        return messageId
     }
 
     override fun editMessage(
         chatId: String,
         messageId: Int,
         newContent: String,
-        requiresMarkdown: Boolean,
         editAfterMinutes: Int
     ) {
         logger.info("Scheduling message edit in {} minutes for chat {}: {}", editAfterMinutes, chatId, newContent)
@@ -158,14 +160,19 @@ abstract class AbstractBotLifeStage(private val botToken: String) : BotLifeStage
                 val editMessage = EditMessageText.builder()
                     .chatId(chatId)
                     .messageId(messageId)
-                    .text(if (requiresMarkdown) escapeMarkdownV2(newContent) else newContent)
-                    .apply { if (requiresMarkdown) parseMode("MarkdownV2") }
+                    .text(escapeMarkdownV2(newContent))
+                    .apply { parseMode("MarkdownV2") }
                     .build()
                 telegramClient.execute(editMessage)
             } catch (t: Throwable) {
                 logger.error("I could not edit message with id {} in chat {}", messageId, chatId)
             }
         }, editAfterMinutes.toLong(), TimeUnit.MINUTES)
+    }
+
+    private fun escapeMarkdownV2(text: String): String {
+        val specialChars = "_[]()~>#+-=|{}.!".toCharArray()
+        return text.map { if (it in specialChars) "\\$it" else it.toString() }.joinToString("")
     }
 
     private fun createInlineKeyboard(actionButtons: List<ActionButton>): InlineKeyboardMarkup {
@@ -187,8 +194,16 @@ abstract class AbstractBotLifeStage(private val botToken: String) : BotLifeStage
         return canAnswer
     }
 
-    private fun escapeMarkdownV2(text: String): String {
-        val specialChars = "_*[]()~>#+-=|{}.!".toCharArray()
-        return text.map { if (it in specialChars) "\\$it" else it.toString() }.joinToString("")
+
+    private fun deleteMessage(chatId: String, messageId: Int) {
+        require(chatId.isNotEmpty()) { "Chat Id cannot be empty" }
+
+        val deleteMessage = DeleteMessage.builder()
+            .chatId(chatId)
+            .messageId(messageId)
+            .build()
+
+        telegramClient.execute(deleteMessage)
     }
+
 }
