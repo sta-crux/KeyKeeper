@@ -25,7 +25,7 @@ object ServiceProvider {
     }
 
     fun getDefaultBackUpService(): BackUpService {
-        return BackUpArchive()
+        return BackUpArchive(getDefaultWebSiteParsingService())
     }
 
     fun getDefaultSessionService(): SessionService {

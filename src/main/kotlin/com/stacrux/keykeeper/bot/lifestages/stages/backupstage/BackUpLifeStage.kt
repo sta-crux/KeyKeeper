@@ -92,14 +92,27 @@ class BackUpLifeStage(
     override fun reactToReceivedFile(request: FileProvidedByTelegramUser) {
         logger.info("Received a file from the user")
         val downloadedFile = request.downloadedFile
-        if (!backUpService.isValidBackUpFile(downloadedFile)) {
+        val supportedFileType = try {
+            backUpService.inspectProvidedImportFile(downloadedFile)
+        } catch (e: Exception) {
             sendMessage(
                 request.chatId,
-                "Sorry, this file is not valid, send me a zip",
+                "Sorry, this file is not valid, send me a zip or a well formed csv (supported exports: Firefox)",
+                actionButtons = primaryActions
+            )
+        }
+
+        if (supportedFileType == BackUpService.SupportedFiles.FIREFOX) {
+            val credentials = backUpService.import3rdPartyExport(downloadedFile)
+            credentialsService.insertEntries(credentials)
+            sendMessage(
+                chatId,
+                "Done, imported ${credentials.size} entries.",
                 actionButtons = primaryActions
             )
             return
         }
+
         if (!backUpService.isProtectedBackUpFile(downloadedFile)) {
             val credentials = backUpService.importPlainBackUpFile(downloadedFile)
             credentialsService.insertEntries(credentials)
@@ -166,7 +179,6 @@ class BackUpLifeStage(
             actionButtons = primaryActions
         )
     }
-
 
 
 }

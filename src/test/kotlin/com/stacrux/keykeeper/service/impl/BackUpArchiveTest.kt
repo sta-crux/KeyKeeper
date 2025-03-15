@@ -1,6 +1,8 @@
 package com.stacrux.keykeeper.service.impl
 
 import com.stacrux.keykeeper.ServiceProvider
+import com.stacrux.keykeeper.service.BackUpService
+import kotlinx.serialization.builtins.serializer
 import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.model.ZipParameters
 import net.lingala.zip4j.model.enums.AesKeyStrength
@@ -62,7 +64,10 @@ class BackUpArchiveTest {
     @Test
     fun testImportUnprotectedFile() {
         val unprotectedFile = createTestCsvZip()
-        assertTrue { backUpService.isValidBackUpFile(unprotectedFile) }
+        assertEquals(
+            BackUpService.SupportedFiles.KEY_KEEPER_CLEAR,
+            backUpService.inspectProvidedImportFile(unprotectedFile)
+        )
         assertFalse { backUpService.isProtectedBackUpFile(unprotectedFile) }
         val credentialEntries = assertDoesNotThrow { backUpService.importPlainBackUpFile(unprotectedFile) }
         assertEquals(10, credentialEntries.size)
@@ -71,7 +76,10 @@ class BackUpArchiveTest {
     @Test
     fun testImportProtectedFile() {
         val protectedFile = createTestCsvZip("password")
-        assertTrue { backUpService.isValidBackUpFile(protectedFile) }
+        assertEquals(
+            BackUpService.SupportedFiles.KEY_KEEPER_PROTECTED,
+            backUpService.inspectProvidedImportFile(protectedFile)
+        )
         assertTrue { backUpService.isProtectedBackUpFile(protectedFile) }
         assertThrows<Exception> { backUpService.importPlainBackUpFile(protectedFile) }
         assertThrows<Exception> { backUpService.importEncryptedBackUpFile(protectedFile, "wrong_password") }
@@ -85,7 +93,10 @@ class BackUpArchiveTest {
         val unprotectedFile = createTestCsvZip()
         val credentials = backUpService.importPlainBackUpFile(unprotectedFile)
         val createBackUpFile = backUpService.createBackUpFile(credentials, "tag", "password", "userid")
-        assertTrue { backUpService.isValidBackUpFile(createBackUpFile) }
+        assertEquals(
+            BackUpService.SupportedFiles.KEY_KEEPER_PROTECTED,
+            backUpService.inspectProvidedImportFile(createBackUpFile)
+        )
         assertTrue { backUpService.isProtectedBackUpFile(createBackUpFile) }
     }
 
@@ -96,6 +107,44 @@ class BackUpArchiveTest {
         val createBackUpFile = backUpService.createBackUpFile(credentials, "tag", "password", "userid")
         val creds = assertDoesNotThrow { backUpService.importEncryptedBackUpFile(createBackUpFile, "password") }
         assertEquals(10, creds.size)
+    }
+
+    @Test
+    fun testImportFirefoxExport() {
+        val firefoxCsv = File.createTempFile("test_logins_firefox", ".csv").apply {
+            writeText(
+                """
+"url","username","password","httpRealm","formActionOrigin","guid","timeCreated","timeLastUsed","timePasswordChanged"
+"https://bitbucket.org","theuser","tonica123",,"https://bitbucket.org","{}","1494588049925","1494588049925","1494588049925"
+"https://www.cealten.fr","emp","pass",,"https://www.cealten.fr","{}","1568282606612","1568282606612","1568282606612"
+            """.trimIndent()
+            )
+            deleteOnExit()
+        }
+
+        val extracted = assertDoesNotThrow { backUpService.import3rdPartyExport(firefoxCsv) }
+        assertEquals(2, extracted.size)
+        assertEquals("bitbucket", extracted[0].host)
+        assertEquals("tonica123", extracted[0].password)
+        assertEquals("theuser", extracted[0].username)
+    }
+
+
+    @Test
+    fun testImportType() {
+        val firefoxCsv = File.createTempFile("test_logins_firefox", ".csv").apply {
+            writeText(
+                """
+"url","username","password","httpRealm","formActionOrigin","guid","timeCreated","timeLastUsed","timePasswordChanged"
+"https://bitbucket.org","theuser","tonica123",,"https://bitbucket.org","{}","1494588049925","1494588049925","1494588049925"
+"https://www.cealten.fr","emp","pass",,"https://www.cealten.fr","{}","1568282606612","1568282606612","1568282606612"
+            """.trimIndent()
+            )
+            deleteOnExit()
+        }
+
+        val supportedType = assertDoesNotThrow { backUpService.inspectProvidedImportFile(firefoxCsv) }
+        assertEquals(BackUpService.SupportedFiles.FIREFOX, supportedType)
     }
 
 }

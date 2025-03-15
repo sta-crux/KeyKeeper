@@ -75,30 +75,34 @@ class RestoreSessionLifeStage(
 
     override fun reactToReceivedFile(request: FileProvidedByTelegramUser) {
         val downloadedFile = request.downloadedFile
-        if (!backUpService.isValidBackUpFile(downloadedFile)) {
+        val supportedFileType = try {
+            backUpService.inspectProvidedImportFile(downloadedFile)
+        } catch (e: Exception) {
             sendMessage(
                 request.chatId,
-                "Sorry, this file is not valid, send me a zip",
+                "Sorry, this file is not valid, send me a zip or a well formed csv (supported exports: Firefox)",
                 actionButtons = primaryActions
             )
-            return
         }
         if (!backUpService.isProtectedBackUpFile(downloadedFile)) {
             val credentials = backUpService.importPlainBackUpFile(downloadedFile)
             credentialsService.insertEntries(credentials)
             sendMessage(
                 chatId,
-                "Alright I have used the file you just provided, I have successfully, " +
-                        "imported ${credentials.size} entries."
+                "Done, imported ${credentials.size} entries.",
+                actionButtons = primaryActions
             )
+            super.getKeyKeeper().advanceBotLifeStage(chatId, BotRunningState.SERVING)
             return
         }
         this.backUpFile = downloadedFile
         sendMessage(
             request.chatId,
-            "Password protected backup received, please send me the password to open it"
+            "Password protected backup received, please send me the password to open it",
+            actionButtons = primaryActions
         )
     }
+
 
     private fun defaultMessage() {
         val message = buildString {
