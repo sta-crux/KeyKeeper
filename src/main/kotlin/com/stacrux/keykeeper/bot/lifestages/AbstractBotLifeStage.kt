@@ -77,7 +77,7 @@ abstract class AbstractBotLifeStage(private val botToken: String) : BotLifeStage
                     defaultMonitoringService.getMessagesByUserId(request.monitoringRequest.requestedUserId)
                 sendMessage(
                     chatId = request.chatId,
-                    MessageConverter.formatRequests(requestsByUserId)
+                    MessageConverter.formatMessageForAllUserRequests(requestsByUserId)
                 )
             }
         }
@@ -177,7 +177,7 @@ abstract class AbstractBotLifeStage(private val botToken: String) : BotLifeStage
 
     private fun createInlineKeyboard(actionButtons: List<ActionButton>): InlineKeyboardMarkup {
         logger.debug("Creating inline keyboard with {} buttons", actionButtons.size)
-        val buttonRows = actionButtons.chunked(2).map { rowButtons ->
+        val buttonRows = actionButtons.chunked(1).map { rowButtons ->
             InlineKeyboardRow(rowButtons.map {
                 InlineKeyboardButton.builder()
                     .text(it.buttonText)

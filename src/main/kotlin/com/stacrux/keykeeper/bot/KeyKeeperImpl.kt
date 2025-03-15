@@ -4,6 +4,7 @@ import com.stacrux.keykeeper.ServiceProvider
 import com.stacrux.keykeeper.bot.lifestages.stages.*
 import com.stacrux.keykeeper.bot.lifestages.stages.addcredentials.AddNewCredentialsStage
 import com.stacrux.keykeeper.bot.lifestages.stages.backupstage.BackUpLifeStage
+import com.stacrux.keykeeper.bot.lifestages.stages.credentialsmanagement.CredentialsManagementLifeStage
 import com.stacrux.keykeeper.bot.lifestages.stages.restoresession.RestoreSessionLifeStage
 import com.stacrux.keykeeper.bot.lifestages.stages.servingpassword.PasswordServingLifeStage
 import com.stacrux.keykeeper.bot.model.BotRunningState
@@ -35,7 +36,8 @@ object KeyKeeperImpl : KeyKeeper {
         KeyKeeperImpl.token = token
         val sessionService = ServiceProvider.getDefaultSessionService()
         if (!sessionService.doesSessionExist()) {
-            runningBotSession = application.registerBot(token, BindUserIdLifeStage(token, ServiceProvider.getDefaultSessionService()))
+            runningBotSession =
+                application.registerBot(token, BindUserIdLifeStage(token, ServiceProvider.getDefaultSessionService()))
             return
         }
         this.userId = sessionService.retrieveBoundUserId()
@@ -84,7 +86,12 @@ object KeyKeeperImpl : KeyKeeper {
                 ServiceProvider.getDefaultSessionService()
             )
 
-            BotRunningState.RESTORE_SESSION -> TODO()
+            BotRunningState.RESTORE_SESSION -> throw Exception("Unexpected life stage selected")
+            BotRunningState.MANAGE_CREDENTIALS -> CredentialsManagementLifeStage(
+                chatId,
+                token,
+                ServiceProvider.getDefaultCredentialsService()
+            )
         }
         startNextState(nextLifeStage)
         this.runningState = nextStage

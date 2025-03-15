@@ -22,7 +22,7 @@ class PasswordServingLifeStage(
     AbstractBotLifeStage(token) {
 
     private val logger = LoggerFactory.getLogger(PasswordServingLifeStage::class.java)
-    private val primaryActions = AddOrBackUpButtons
+    private val primaryActions = MainActionsServingStage
 
     private class RecordedSharedCredentials(
         val messageId: Int,
@@ -105,6 +105,10 @@ class PasswordServingLifeStage(
         }
         if (request.action == primaryActions.getBackUpActionIdentifier()) {
             getKeyKeeper().advanceBotLifeStage(chatId, BotRunningState.BACKUP)
+            return
+        }
+        if (request.action == primaryActions.getManageCredentialsIdentifier()) {
+            getKeyKeeper().advanceBotLifeStage(chatId, BotRunningState.MANAGE_CREDENTIALS)
             return
         }
         if ((request.action == SendCopyableOrDeleteButtons.getCopyModeActionIdentifier())) {

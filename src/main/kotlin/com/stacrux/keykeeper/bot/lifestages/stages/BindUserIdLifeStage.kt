@@ -43,7 +43,7 @@ class BindUserIdLifeStage(token: String, private val sessionService: SessionServ
             sendMessage(
                 request.chatId,
                 "Hey, it seems like I went to sleep and I just woke up!" +
-                        "please send me again the password that I display (wherever I am running) " +
+                        "please send me again the code that I am displaying (wherever I am running) " +
                         "to link your user"
             )
             return

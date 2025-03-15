@@ -30,7 +30,7 @@ object MessageConverter {
         }
     }
 
-    fun formatRequests(requestsByUserId: List<RequestFromTelegram>): String {
+    fun formatMessageForAllUserRequests(requestsByUserId: List<RequestFromTelegram>): String {
         return buildString {
             appendLine("```")
             requestsByUserId

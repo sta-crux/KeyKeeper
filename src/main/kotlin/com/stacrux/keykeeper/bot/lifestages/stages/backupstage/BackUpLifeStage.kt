@@ -22,7 +22,7 @@ class BackUpLifeStage(
     AbstractBotLifeStage(token) {
 
     private val logger = LoggerFactory.getLogger(BackUpLifeStage::class.java)
-    private val primaryActions = AbandonOrBackUpOrToggleAutoBackUp
+    private val primaryActions = MainActionsBackupOptionsStage
 
     private var receivedPasswordsBackup: File? = null
 
@@ -148,7 +148,7 @@ class BackUpLifeStage(
             encryptionKey,
             request.userId
         )
-        if (!sessionService.isStoringBackUps()) {
+        if (sessionService.isStoringBackUps()) {
             sessionService.storeBackUpFile(backUpFile, backUpTag)
         }
         sendFile(request.chatId, backUpFile)
