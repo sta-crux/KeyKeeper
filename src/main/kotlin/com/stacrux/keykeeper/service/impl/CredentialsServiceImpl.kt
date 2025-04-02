@@ -15,7 +15,7 @@ class CredentialsServiceImpl(
 
     override fun doesEntryExist(url: String): Boolean {
         return try {
-            retrieveEntriesAssociatedToUrl(url).isNotEmpty()
+            retrieveEntriesAssociatedToUrlFragment(url).isNotEmpty()
         } catch (e: Exception) {
             false
         }
@@ -33,14 +33,14 @@ class CredentialsServiceImpl(
         }
     }
 
-    override fun retrieveEntriesAssociatedToUrl(url: String): List<CredentialEntry> {
+    override fun retrieveEntriesAssociatedToUrlFragment(urlFragment: String): List<CredentialEntry> {
         val matches: MutableSet<CredentialEntry> = mutableSetOf()
         try {
-            val hostFromUrl = webSiteExtractor.extractWebsiteIdentifier(url)
-            val credentialsForHost = credentialsManager.getCredentialsForHost(hostFromUrl.wholeDomain)
+            val hostFromUrl =  try { webSiteExtractor.extractWebsiteIdentifier(urlFragment).wholeDomain } catch (e: Exception) { urlFragment}
+            val credentialsForHost = credentialsManager.getCredentialsForHost(hostFromUrl)
             matches.addAll(credentialsForHost)
         } catch (e: Exception) {
-            val partialHost = url.split(".").filter { it.length > 3 }
+            val partialHost = urlFragment.split(".").filter { it.length > 3 }
             for (part in partialHost) {
                 val credentialsForHost = credentialsManager.getCredentialsForHost(part)
                 matches.addAll(credentialsForHost)

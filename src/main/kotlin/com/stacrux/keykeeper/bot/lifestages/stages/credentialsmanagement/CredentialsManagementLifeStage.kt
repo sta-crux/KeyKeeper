@@ -69,7 +69,7 @@ class CredentialsManagementLifeStage(
         indexed.entries.map {
             messageContent += "" + it.key + " | " + it.value.host + " | " + it.value.username + " | " +
                     "`delete " + "${it.key}`\n"
-            if (messageContent.length > 3000) {
+            if (messageContent.length > 2000) {
                 sendMessage(chatId, messageContent, actionButtons = actions)
                 messageContent = ""
                 Thread.sleep(800)

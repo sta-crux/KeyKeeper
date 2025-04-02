@@ -47,7 +47,7 @@ class PasswordServingLifeStage(
         val textContent = request.textContent
         if (credentialsService.doesEntryExist(textContent)) {
             logger.info("Found some matches!")
-            val entries = credentialsService.retrieveEntriesAssociatedToUrl(textContent)
+            val entries = credentialsService.retrieveEntriesAssociatedToUrlFragment(textContent)
             val timeBeforeRedact = 5
             sendMessage(
                 chatId, "I've found ${entries.size} match(es) \uD83D\uDE80\n" +

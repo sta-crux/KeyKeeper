@@ -1,46 +1,43 @@
 package com.stacrux.keykeeper
 
-import org.apache.commons.lang3.StringUtils
 import java.io.File
 import kotlin.system.exitProcess
 
 fun main() {
+    val botToken = getBotToken() ?: return
 
-    // the first time the token is taken from the standard input,
-    // then stored to a file inside home/keyKeeper/botToken
-    var botToken: String? = loadBotToken()
-
-    while (StringUtils.isBlank(botToken)) {
-        print("Insert bot token: ")
-        val input = readlnOrNull()
-        if (input.equals("exit", ignoreCase = true)) {
-            println("Shutting down bot...")
-            exitProcess(0) // Stop the program
-        } else {
-            botToken = input
-        }
-    }
     val keyKeeperService = ServiceProvider.getKeyKeeperService()
-    keyKeeperService.initializeAndStartBot(botToken ?: "")
-    saveBotToken(botToken ?: throw Exception())
+    keyKeeperService.initializeAndStartBot(botToken)
+    saveBotToken(botToken)
 
     println("KeyKeeper bot is running...")
 }
 
-private val keyKeeperDir = File(System.getProperty("user.home"), "keyKeeper").apply {
-    mkdirs()
-}
+private val keyKeeperDir = File(System.getProperty("user.home"), "keyKeeper").apply { mkdirs() }
 
-fun loadBotToken(): String? {
-    val file = File(keyKeeperDir, "botToken")
-    return if (file.exists() && file.length() > 0) {
-        file.readText().trim()
-    } else {
-        null
+private fun getBotToken(): String? {
+    loadBotToken()?.let { return it }
+
+    while (true) {
+        print("Insert bot token: ")
+        val input = readlnOrNull()?.trim()
+
+        if (input.equals("exit", ignoreCase = true)) {
+            println("Shutting down bot...")
+            exitProcess(0)
+        }
+
+        if (!input.isNullOrBlank()) {
+            return input
+        }
     }
 }
 
-fun saveBotToken(token: String) {
+private fun loadBotToken(): String? {
     val file = File(keyKeeperDir, "botToken")
-    file.writeText(token.trim())
+    return file.takeIf { it.exists() && it.length() > 0 }?.readText()?.trim()
+}
+
+private fun saveBotToken(token: String) {
+    File(keyKeeperDir, "botToken").writeText(token.trim())
 }

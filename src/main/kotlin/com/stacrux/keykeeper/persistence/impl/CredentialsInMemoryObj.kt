@@ -9,11 +9,23 @@ object CredentialsInMemoryObj : CredentialsManager {
         mutableListOf()
 
     override fun getCredentialsForHost(host: String): List<CredentialEntry> {
-        val normalizedHost = host.lowercase() // Normalize input to lowercase
+        fun extractLetters(input: String) = input.lowercase().filter { it.isLetter() }
+
+        val lowerHost = host.lowercase()
+        val lettersOnlyHost = extractLetters(host)
+
         return inMemoryCredentials.filter { credential ->
-            credential.host.lowercase().contains(normalizedHost) // Perform a case-insensitive substring match
+            val lowerCredentialHost = credential.host.lowercase()
+            val lettersOnlyCredentialHost = extractLetters(credential.host)
+
+            val basicMatch = lowerCredentialHost.contains(lowerHost) || lowerHost.contains(lowerCredentialHost)
+            val alphabeticMatch = lettersOnlyHost.isNotEmpty() && lettersOnlyCredentialHost.isNotEmpty() &&
+                    (lettersOnlyCredentialHost.contains(lettersOnlyHost) || lettersOnlyHost.contains(lettersOnlyCredentialHost))
+
+            basicMatch || alphabeticMatch
         }
     }
+
 
     override fun doesHostExist(host: String): Boolean {
         val normalizedHost = host.lowercase() // Normalize input to lowercase
