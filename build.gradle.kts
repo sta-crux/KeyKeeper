@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version "2.1.10"
     application
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    `maven-publish`
 }
 
 kotlin {
@@ -59,3 +60,26 @@ tasks.jar {
         attributes["Main-Class"] = "com.stacrux.keykeeper.MainKt"
     }
 }
+
+
+publishing {
+    publications {
+        create<MavenPublication>("gpr") {
+            artifact(tasks.shadowJar)
+            groupId = "com.stacrux"
+            artifactId = "keykeeper"
+            version = "1.0.0"
+        }
+    }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/sta-crux/KeyKeeper")
+            credentials {
+                username = System.getenv("GPR_USER")
+                password = System.getenv("GPR_TOKEN_KEYKEEPER")
+            }
+        }
+    }
+}
+
