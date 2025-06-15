@@ -73,6 +73,7 @@ class PasswordServingLifeStage(
                 "Nothing to see here \uD83E\uDD77\uD83C\uDFFC",
                 this
             )
+            Thread.sleep(150) // sleep to avoid hitting the telegram limit
         }
     }
 

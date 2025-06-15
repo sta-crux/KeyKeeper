@@ -40,7 +40,7 @@ class CredentialsServiceImpl(
             val credentialsForHost = credentialsManager.getCredentialsForHost(hostFromUrl)
             matches.addAll(credentialsForHost)
         } catch (e: Exception) {
-            val partialHost = urlFragment.split(".").filter { it.length > 3 }
+            val partialHost = urlFragment.split(".")
             for (part in partialHost) {
                 val credentialsForHost = credentialsManager.getCredentialsForHost(part)
                 matches.addAll(credentialsForHost)

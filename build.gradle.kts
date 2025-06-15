@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm") version "2.1.10"
     application
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    //id("com.github.johnrengelman.shadow") version "8.1.1"
     `maven-publish`
 }
 
@@ -47,6 +47,7 @@ application {
     mainClass.set("com.stacrux.keykeeper.MainKt")
 }
 
+/*
 tasks {
     shadowJar {
         archiveBaseName.set("keykeeper")
@@ -54,6 +55,7 @@ tasks {
         archiveClassifier.set("")
     }
 }
+*/
 
 tasks.jar {
     manifest {
@@ -65,10 +67,10 @@ tasks.jar {
 publishing {
     publications {
         create<MavenPublication>("gpr") {
-            artifact(tasks.shadowJar)
+            from(components["java"]) // this publishes only your compiled code + resources, no deps
             groupId = "com.stacrux"
             artifactId = "keykeeper"
-            version = "1.0.0"
+            version = "1.0.3"
         }
     }
     repositories {
@@ -82,4 +84,5 @@ publishing {
         }
     }
 }
+
 

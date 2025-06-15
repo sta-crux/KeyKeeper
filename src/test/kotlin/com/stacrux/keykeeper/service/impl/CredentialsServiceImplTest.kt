@@ -16,6 +16,34 @@ class CredentialsServiceImplTest {
     private val testSecret = "secret"
 
     @Test
+    fun insertThenGetShortDomain() {
+        val newUrl = "https://it.com/c/67bf991f-cf18"
+        assertFalse { credentialsService.doesEntryExist(newUrl) }
+        assertDoesNotThrow { credentialsService.insertEntry(newUrl, testLogin, testSecret) }
+        // basic validation of getting
+        var retrievedCredentials = assertDoesNotThrow { credentialsService.retrieveEntriesAssociatedToUrlFragment(newUrl) }
+        assertEquals(1, retrievedCredentials.size)
+        assertTrue { newUrl.contains(retrievedCredentials[0].host) }
+        assertEquals(testLogin, retrievedCredentials[0].username)
+        assertEquals(testSecret, retrievedCredentials[0].password)
+        // get it passing the exact value
+        retrievedCredentials = assertDoesNotThrow { credentialsService.retrieveEntriesAssociatedToUrlFragment("it") }
+        assertEquals(1, retrievedCredentials.size)
+        assertTrue { newUrl.contains(retrievedCredentials[0].host) }
+        assertEquals(testLogin, retrievedCredentials[0].username)
+        assertEquals(testSecret, retrievedCredentials[0].password)
+        // get it passing just i
+        retrievedCredentials = assertDoesNotThrow { credentialsService.retrieveEntriesAssociatedToUrlFragment("i") }
+        assertEquals(1, retrievedCredentials.size)
+        assertTrue { newUrl.contains(retrievedCredentials[0].host) }
+        assertEquals(testLogin, retrievedCredentials[0].username)
+        assertEquals(testSecret, retrievedCredentials[0].password)
+        // do not get it passing a host containing it
+        retrievedCredentials = assertDoesNotThrow { credentialsService.retrieveEntriesAssociatedToUrlFragment("brit") }
+        assertEquals(0, retrievedCredentials.size)
+    }
+
+    @Test
     fun insertThenGet() {
         val newUrl = "https://chatgpt.com/c/67bf991f-cf18" +
                 RandomStringUtils.randomAlphabetic(10).lowercase(Locale.getDefault())

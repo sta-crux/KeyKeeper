@@ -23,9 +23,9 @@ interface KeyKeeper {
     fun canAnswer(userId: String): Boolean
 
     /**
-     * Bot startup and init routine
+     * Bot startup and init routine. If the bot is unbound, the binding key is returned
      */
-    fun initializeAndStartBot(token: String)
+    fun initializeAndStartBot(token: String): String?
 
     /**
      * Start the new life-stage of the bot

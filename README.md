@@ -55,6 +55,7 @@ Use this bot at your own risk and keeping in mind what is written above.
 ### Installation
 
 1. Build the fat JAR with dependencies:
+   uncomment the lines related to shadow jar in the build.gradle.kts and then run
    ```sh
    ./gradlew shadowJar
    ```

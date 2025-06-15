@@ -15,12 +15,17 @@ object CredentialsInMemoryObj : CredentialsManager {
         val lettersOnlyHost = extractLetters(host)
 
         return inMemoryCredentials.filter { credential ->
-            val lowerCredentialHost = credential.host.lowercase()
+            val storedHost = credential.host.lowercase()
             val lettersOnlyCredentialHost = extractLetters(credential.host)
-
-            val basicMatch = lowerCredentialHost.contains(lowerHost) || lowerHost.contains(lowerCredentialHost)
-            val alphabeticMatch = lettersOnlyHost.isNotEmpty() && lettersOnlyCredentialHost.isNotEmpty() &&
-                    (lettersOnlyCredentialHost.contains(lettersOnlyHost) || lettersOnlyHost.contains(lettersOnlyCredentialHost))
+            val basicMatch =
+                storedHost == lowerHost ||
+                storedHost.contains(lowerHost) ||
+                (storedHost.length > 2 && lowerHost.contains(storedHost))
+            val alphabeticMatch =
+                lettersOnlyHost.isNotEmpty() &&
+                lettersOnlyCredentialHost.isNotEmpty() &&
+                (lettersOnlyCredentialHost.contains(lettersOnlyHost) ||
+                (storedHost.length > 3 && lettersOnlyHost.contains(lettersOnlyCredentialHost)))
 
             basicMatch || alphabeticMatch
         }

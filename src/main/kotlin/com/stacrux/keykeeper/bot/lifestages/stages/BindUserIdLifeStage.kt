@@ -13,7 +13,7 @@ class BindUserIdLifeStage(token: String, private val sessionService: SessionServ
 
     private val logger = LoggerFactory.getLogger(BindUserIdLifeStage::class.java)
     private val messagesHitCounter: MutableMap<String, Int> = mutableMapOf()
-    private val keyToMatch = RandomStringUtils.randomAlphabetic(32)
+    private val keyToMatch = RandomStringUtils.randomAlphabetic(8)
 
     init {
         logger.info("Starting BoundUserIdToBot")
@@ -59,4 +59,7 @@ class BindUserIdLifeStage(token: String, private val sessionService: SessionServ
         return
     }
 
+    fun getKeyToMatch(): String {
+        return keyToMatch
+    }
 }

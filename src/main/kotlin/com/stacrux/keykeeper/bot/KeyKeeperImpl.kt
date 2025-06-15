@@ -32,13 +32,14 @@ object KeyKeeperImpl : KeyKeeper {
         return runningState == BotRunningState.UNBOUND || userId == KeyKeeperImpl.userId
     }
 
-    override fun initializeAndStartBot(token: String) {
+    override fun initializeAndStartBot(token: String): String? {
         KeyKeeperImpl.token = token
         val sessionService = ServiceProvider.getDefaultSessionService()
         if (!sessionService.doesSessionExist()) {
+            val bindUserIdLifeStage = BindUserIdLifeStage(token, ServiceProvider.getDefaultSessionService())
             runningBotSession =
-                application.registerBot(token, BindUserIdLifeStage(token, ServiceProvider.getDefaultSessionService()))
-            return
+                application.registerBot(token, bindUserIdLifeStage)
+            return bindUserIdLifeStage.getKeyToMatch()
         }
         this.userId = sessionService.retrieveBoundUserId()
         runningState = BotRunningState.RESTORE_SESSION
@@ -52,6 +53,7 @@ object KeyKeeperImpl : KeyKeeper {
                 if (!sessionService.doesBackUpFileExist()) null else sessionService.retrieveBackUpFile()
             )
         )
+        return null
     }
 
     override fun advanceBotLifeStage(chatId: String, nextStage: BotRunningState): BotRunningState {
