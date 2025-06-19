@@ -7,12 +7,12 @@ import org.apache.commons.lang3.StringUtils
 import org.slf4j.LoggerFactory
 import java.io.File
 
-class SessionManagerFS : SessionManager {
+class SessionManagerFS(baseDir: File) : SessionManager(baseDir) {
 
     private val logger = LoggerFactory.getLogger(SessionManagerFS::class.java)
 
-    private val keyKeeperDir = File(System.getProperty("user.home"), "keyKeeper").apply {
-        mkdirs()
+    private val keyKeeperDir = File(baseDir, "keyKeeper").apply {
+        if (!exists()) mkdirs()
         logger.info("KeyKeeper directory initialized at: $absolutePath")
     }
     private val sessionFile = File(keyKeeperDir, "session.yaml")

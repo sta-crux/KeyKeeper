@@ -70,7 +70,7 @@ publishing {
             from(components["java"]) // this publishes only your compiled code + resources, no deps
             groupId = "com.stacrux"
             artifactId = "keykeeper"
-            version = "1.0.3"
+            version = "1.0.5"
         }
     }
     repositories {
