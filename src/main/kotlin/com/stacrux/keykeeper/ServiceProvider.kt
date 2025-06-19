@@ -10,7 +10,6 @@ import com.stacrux.keykeeper.persistence.impl.InMemoryInteractionManager
 import com.stacrux.keykeeper.persistence.impl.SessionManagerFS
 import com.stacrux.keykeeper.service.*
 import com.stacrux.keykeeper.service.impl.*
-import java.io.File
 
 /**
  * Use this object to retrieve the services wherever they are needed
@@ -27,15 +26,6 @@ object ServiceProvider {
 
     fun getDefaultBackUpService(): BackUpService {
         return BackUpArchive(getDefaultWebSiteParsingService())
-    }
-
-    var baseDir: File = File(System.getProperty("user.home"))
-
-    /**
-     * Call this method to provide a base directory where the bots will save its file
-     */
-    fun customizeBaseDir(baseDir: File) {
-        ServiceProvider.baseDir = baseDir
     }
 
     fun getDefaultSessionService(): SessionService {
@@ -63,7 +53,7 @@ object ServiceProvider {
      */
     class SubServicesProvider private constructor() {
         fun getDefaultSessionManager(): SessionManager {
-            return SessionManagerFS(baseDir)
+            return SessionManagerFS(OSConfig.baseDir)
         }
 
         fun getDefaultCredentialsManager(): CredentialsManager {

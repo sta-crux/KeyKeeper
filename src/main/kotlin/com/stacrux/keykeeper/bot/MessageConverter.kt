@@ -1,5 +1,6 @@
 package com.stacrux.keykeeper.bot
 
+import com.stacrux.keykeeper.OSConfig
 import com.stacrux.keykeeper.ServiceProvider
 import com.stacrux.keykeeper.model.*
 import okhttp3.OkHttpClient
@@ -191,7 +192,7 @@ object MessageConverter {
         val fileBytes = fileResponse.body!!.bytes()
 
         // Save file locally
-        val file = File(fileName)
+        val file = File(OSConfig.cacheDir,fileName)
         file.writeBytes(fileBytes)
         return file
     }
