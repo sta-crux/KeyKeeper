@@ -70,4 +70,9 @@ interface BotLifeStage : LongPollingSingleThreadUpdateConsumer {
     fun getKeyKeeper(): KeyKeeper {
         return ServiceProvider.getKeyKeeperService()
     }
+
+    /**
+     * returns the bot username from telegram servers
+     */
+    fun getBotUserName(): String
 }

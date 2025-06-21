@@ -23,6 +23,9 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
+import org.telegram.telegrambots.meta.api.methods.GetMe
+import org.telegram.telegrambots.meta.api.objects.User
+
 /**
  * Abstract class representing a bot life stage.
  * Extend this class to create specific life stages.
@@ -32,6 +35,12 @@ abstract class AbstractBotLifeStage(private val botToken: String) : BotLifeStage
     private val logger = LoggerFactory.getLogger(AbstractBotLifeStage::class.java)
     private val telegramClient: TelegramClient = OkHttpTelegramClient(botToken)
     private val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
+
+    override fun getBotUserName(): String {
+        val client = OkHttpTelegramClient(botToken)
+        val me: User = client.execute(GetMe())
+        return me.userName
+    }
 
     override fun consume(update: Update) {
         logger.info("Received update: {}", update)

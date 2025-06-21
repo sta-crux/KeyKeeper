@@ -7,11 +7,13 @@ import com.stacrux.keykeeper.bot.lifestages.stages.backupstage.BackUpLifeStage
 import com.stacrux.keykeeper.bot.lifestages.stages.credentialsmanagement.CredentialsManagementLifeStage
 import com.stacrux.keykeeper.bot.lifestages.stages.restoresession.RestoreSessionLifeStage
 import com.stacrux.keykeeper.bot.lifestages.stages.servingpassword.PasswordServingLifeStage
+import com.stacrux.keykeeper.bot.model.BotBindingDetails
 import com.stacrux.keykeeper.bot.model.BotRunningState
 import org.slf4j.LoggerFactory
 import org.telegram.telegrambots.longpolling.BotSession
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication
 import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer
+import java.time.Instant
 
 
 object KeyKeeperImpl : KeyKeeper {
@@ -32,28 +34,29 @@ object KeyKeeperImpl : KeyKeeper {
         return runningState == BotRunningState.UNBOUND || userId == KeyKeeperImpl.userId
     }
 
-    override fun initializeAndStartBot(token: String): String? {
+    override fun initializeAndStartBot(token: String): BotBindingDetails {
         KeyKeeperImpl.token = token
         val sessionService = ServiceProvider.getDefaultSessionService()
         if (!sessionService.doesSessionExist()) {
             val bindUserIdLifeStage = BindUserIdLifeStage(token, ServiceProvider.getDefaultSessionService())
             runningBotSession =
                 application.registerBot(token, bindUserIdLifeStage)
-            return bindUserIdLifeStage.getKeyToMatch()
+            return BotBindingDetails(bindUserIdLifeStage.getBotUserName(), bindUserIdLifeStage.getKeyToMatch())
         }
         this.userId = sessionService.retrieveBoundUserId()
         runningState = BotRunningState.RESTORE_SESSION
-        runningBotSession = application.registerBot(
-            token, RestoreSessionLifeStage(
-                token,
-                userId,
-                ServiceProvider.getDefaultCredentialsService(),
-                ServiceProvider.getDefaultSessionService(),
-                ServiceProvider.getDefaultBackUpService(),
-                if (!sessionService.doesBackUpFileExist()) null else sessionService.retrieveBackUpFile()
-            )
+        val lifeStage = RestoreSessionLifeStage(
+            token,
+            userId,
+            ServiceProvider.getDefaultCredentialsService(),
+            ServiceProvider.getDefaultSessionService(),
+            ServiceProvider.getDefaultBackUpService(),
+            if (!sessionService.doesBackUpFileExist()) null else sessionService.retrieveBackUpFile()
         )
-        return null
+        runningBotSession = application.registerBot(
+            token, lifeStage
+        )
+        return BotBindingDetails(lifeStage.getBotUserName(), null)
     }
 
     override fun advanceBotLifeStage(chatId: String, nextStage: BotRunningState): BotRunningState {
@@ -102,7 +105,11 @@ object KeyKeeperImpl : KeyKeeper {
 
 
     override fun shutdown() {
-        runningBotSession.stop()
+        application.close()
+        val timeout = Instant.now().plus(java.time.Duration.ofSeconds(15))
+        while (application.isRunning && Instant.now().isBefore(timeout)) {
+            Thread.sleep(100) // wait until session is really down
+        }
     }
 
     private fun startNextState(nextPollingBot: LongPollingUpdateConsumer) {

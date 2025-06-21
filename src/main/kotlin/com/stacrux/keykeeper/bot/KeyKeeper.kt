@@ -1,5 +1,6 @@
 package com.stacrux.keykeeper.bot
 
+import com.stacrux.keykeeper.bot.model.BotBindingDetails
 import com.stacrux.keykeeper.bot.model.BotRunningState
 
 /**
@@ -9,7 +10,6 @@ import com.stacrux.keykeeper.bot.model.BotRunningState
  * life-stage: Serving the passwords, in this stage the bot serves the password or store new ones if needed
  */
 interface KeyKeeper {
-
 
     /**
      * used to set the user id that the bot will reply to with the passwords
@@ -25,7 +25,7 @@ interface KeyKeeper {
     /**
      * Bot startup and init routine. If the bot is unbound, the binding key is returned
      */
-    fun initializeAndStartBot(token: String): String?
+    fun initializeAndStartBot(token: String): BotBindingDetails?
 
     /**
      * Start the new life-stage of the bot

@@ -29,7 +29,7 @@ dependencies {
     implementation("org.telegram:telegrambots-client:8.2.0")
     // logging
     implementation("org.slf4j:slf4j-api:2.0.7")
-    implementation("ch.qos.logback:logback-classic:1.4.12")
+    implementation("ch.qos.logback:logback-classic:1.5.13")
     // to zip to create or unpack backup files
     implementation("net.lingala.zip4j:zip4j:2.11.5")
     // json to talk with telegram servers and retrieve files or to create the yamls
@@ -70,7 +70,7 @@ publishing {
             from(components["java"]) // this publishes only your compiled code + resources, no deps
             groupId = "com.stacrux"
             artifactId = "keykeeper"
-            version = "1.0.6"
+            version = "1.0.7"
         }
     }
     repositories {
