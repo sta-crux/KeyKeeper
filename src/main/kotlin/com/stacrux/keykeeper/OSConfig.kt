@@ -2,6 +2,9 @@ package com.stacrux.keykeeper
 
 import java.io.File
 
+/**
+ * Expose OS dependant settings, all have default values and should be fine under a standard linux env
+ */
 object OSConfig {
 
     var baseDir: File = File(System.getProperty("user.home"))

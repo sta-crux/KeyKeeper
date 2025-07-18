@@ -9,6 +9,9 @@ import com.stacrux.keykeeper.service.CredentialsService
 import com.stacrux.keykeeper.service.WebsiteParsingService
 import org.slf4j.LoggerFactory
 
+/**
+ * This life stage is used to group the features around adding new credentials to the vault
+ */
 class AddNewCredentialsStage(
     token: String,
     val chatId: String,

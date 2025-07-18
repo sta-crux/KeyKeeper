@@ -23,16 +23,22 @@ Use this bot at your own risk and keeping in mind what is written above.
 
 ## Architecture
 
-### Components
+The Bot main class is the implementation of "KeyKeeper".
+The bot is always in a state called "life stage"
 
-1. **Bot Life Stages**: The bot current state is called Life Stage, any life stage is an extension of `AbstractBotLifeStage`
+**Bot Life Stages**: The bot current state is called Life Stage, any life stage is an extension of `AbstractBotLifeStage`
    - `Binding a user id`: This bot life stage is designed to interact with a single user, which must be bound at the first start
    - `Serving credentials`: The main life stage, the bot expects any URL as message and will return the related credentials (if present)
-   - `Add new credentials`: In this life stage the bot register new credentials 
+   - `Add new credentials`: In this life stage the bot register new credentials
    - `BackUpLifeStage`: Manages backup and restore functionalities
    - `Restoring session life stage`:  the bot works by default in a stateless way, in case of reboots you will have to provide the backup file with the related password. If the stateful mode is enabled, in case of reboots the bot tries to import the locally stored backup, you will have to send it the right password (shared with you previously by the bot itself)
 
-3. **Services**
+if more actions are required, this more likely means defining a new life stage and a way to start it. 
+To start a life stage you can call the method advanceBotLifeStage passing the next desired life stage; when to call this method? when the need arise, for instance receiving a message that should change life stage
+
+The logic used during lifestages to interact with the model is exposed via services, the main ones are
+
+**Services**
    - `BackUpService`: Handles encryption, decryption, and file validation.
    - `CredentialsService`: Manages credential storage and retrieval.
    - `SessionService`: Tracks session status and backup preferences.
