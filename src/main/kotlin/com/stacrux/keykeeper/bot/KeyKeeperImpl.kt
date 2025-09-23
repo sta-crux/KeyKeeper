@@ -112,6 +112,17 @@ object KeyKeeperImpl : KeyKeeper {
         }
     }
 
+    override fun getRunningState(): BotRunningState {
+        return runningState
+    }
+
+    override fun getBindingKey(): String {
+        if (runningState != BotRunningState.UNBOUND) {
+            throw Exception("The bot is already bound to a user, no binding key available.")
+        }
+        return (runningBotSession.updatesConsumer as BindUserIdLifeStage).getKeyToMatch()
+    }
+
     private fun startNextState(nextPollingBot: LongPollingUpdateConsumer) {
         if (::runningBotSession.isInitialized) {
             val previousBotSession = runningBotSession

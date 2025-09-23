@@ -1,0 +1,14 @@
+services:
+  keykeeper-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: keykeeper-bot
+    ports:
+      - "9130:8080"   # host:container
+    volumes:
+      - keykeeper-persisted:/home/keyKeeper
+    restart: unless-stopped
+
+volumes:
+  keykeeper-persisted:

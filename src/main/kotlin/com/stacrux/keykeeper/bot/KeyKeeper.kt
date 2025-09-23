@@ -37,4 +37,13 @@ interface KeyKeeper {
      */
     fun shutdown()
 
+    /**
+     * Returns the current running state
+     */
+    fun getRunningState(): BotRunningState
+
+    /**
+     * Returns the binding key if the bot is unbound, otherwise throws an exception
+     */
+    fun getBindingKey(): String
 }
