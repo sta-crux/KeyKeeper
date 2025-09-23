@@ -1,5 +1,5 @@
 # ---- Stage 1: Build ----
-FROM FROM docker.io/library/gradle:8.10.2-jdk17 AS builder
+FROM docker.io/library/gradle:8.10.2-jdk17 AS builder
 WORKDIR /app
 
 # Copy build scripts first to leverage Gradle cache
