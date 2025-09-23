@@ -1,5 +1,5 @@
 # ---- Stage 1: Build ----
-FROM gradle:8.10.2-jdk17 AS builder
+FROM FROM docker.io/library/gradle:8.10.2-jdk17 AS builder
 WORKDIR /app
 
 # Copy build scripts first to leverage Gradle cache
@@ -14,7 +14,7 @@ COPY . .
 RUN ./gradlew shadowJar --no-daemon
 
 # ---- Stage 2: Runtime ----
-FROM eclipse-temurin:17-jre
+FROM docker.io/library/eclipse-temurin:17-jre
 WORKDIR /home/
 
 # Copy jar from build stage
