@@ -55,25 +55,34 @@ The logic used during lifestages to interact with the model is exposed via servi
 ## Setup & Usage
 
 ### Prerequisites
-- Java 17+
-- Telegram Bot Token
+- docker and docker compose installed
+- Telegram session (anywhere, pc, smartphone)
 
 ### Installation
 
-1. Build the fat JAR with dependencies:
-   uncomment the lines related to shadow jar in the build.gradle.kts and then run
-   ```sh
-   ./gradlew shadowJar
-   ```
-2. Run the bot:
-   ```sh
-   java -jar build/libs/keykeeper-bot-all.jar
-   ```
-3. Deploy the bot on a server
+- clone this repo
+- cd into the root (KeyKeeper)
+- build and run the container: docker compose up -d --build
+  - to run it again later on, remove the build option: docker compose up -d
 
 ### First usage
-The first time it is started, the bot asks for a token; you can provide it via standard input. Alternatively, you can create a folder "keyKeeper" in your home folder, here create a file "botToken", no extension, containing just the token (this file is created automatically by the bot in case of token provided via standard input).
-If the token is accepted, the bot will print a binding key in the console, send it via telegram to the bot to create a binding, from now on the bot will reply only to you.
+the first time you start the bot you will need to perform 2 actions
+- provide a telegram bot token (generate your own bot using the bot father in telegram)
+  - to do so, the container exposes a POST service
+    - curl -X POST http://localhost:9130/botToken -d "token=YOUR_BOT_TOKEN"
+  - once the token is saved, the bot enters a binding stage, it expects to be linked to a telegram account (yours)
+    - get the binding key (it is just a string of text)
+      - curl -X GET http://localhost:9130/bindingKey?token=YOUR_BOT_TOKEN
+    - from your telegram account, look for the bot (you know the name, you created it with the bot father)
+      - send the binding key to the bot via chat, this will bind it to you
+  - once the binding is done, it won't be necessary to do it again (unless the bot is reinstalled somewhere else)
+
+### Backing up
+All actions are done via Telegram, back-ups included. When selecting the back-up option, the bot will share two messages
+- an encrypted file containing the credentials
+- a password to unencrypt (the bot will not memorize it)
+
+Keep these safe somewhere (for example, forward to yourself), whenever the bot is reinitialized, you can send it back the encrypted file and the password to get back all the credentials (this means that you can install it on a server that dies and reinstall it elsewhere without losing the credentials, provided that you performed regular backups)
 
 ## License
 This project is licensed under the MIT License. See `LICENSE` for details.
