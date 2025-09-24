@@ -18,13 +18,9 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
-    implementation("io.ktor:ktor-server-core:2.3.6")
-    implementation("io.ktor:ktor-server-cio:2.3.6")
-    implementation("io.ktor:ktor-server-content-negotiation:2.3.6")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.6")
 
     // telegram
-    implementation("org.telegram:telegrambots-longpolling:8.2.0")
+    implementation("org.telegram:telegrambots-longpolling:9.1.0")
     implementation("org.telegram:telegrambots-meta:8.2.0")
     implementation("org.telegram:telegrambots-client:8.2.0")
     // logging
@@ -39,12 +35,13 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.18.2")
 
     // server dependencies, not linked to telegram
-    implementation("io.ktor:ktor-server-netty:2.3.6")
-    implementation("io.ktor:ktor-server-core:2.3.6")
-    implementation("io.ktor:ktor-server-call-logging:2.3.6")
-    implementation("io.ktor:ktor-server-content-negotiation:2.3.6")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.6")
-    implementation("io.ktor:ktor-server-host-common:2.3.6")
+    implementation("io.ktor:ktor-server-netty:3.3.0")
+    implementation("io.ktor:ktor-server-core:3.3.0")
+    implementation("io.ktor:ktor-server-call-logging:3.3.0")
+    implementation("io.ktor:ktor-server-content-negotiation:3.3.0")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.3.0")
+    implementation("io.ktor:ktor-server-host-common:3.3.0")
+    implementation("io.ktor:ktor-server-cio:3.3.0")
 
 }
 
