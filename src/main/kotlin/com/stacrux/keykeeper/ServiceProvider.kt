@@ -12,7 +12,7 @@ import com.stacrux.keykeeper.service.*
 import com.stacrux.keykeeper.service.impl.*
 
 /**
- * Use this object to retrieve the services wherever they are needed
+ * Use this object to retrieve the services wherever they are needed, add them in constructors (inject dependencies!)
  */
 object ServiceProvider {
 
@@ -43,8 +43,10 @@ object ServiceProvider {
         return MonitoringServiceImpl(subServiceProvider.getDefaultInteractionsManager())
     }
 
+
+
     /*
-     * Private part
+     * Private part, not directly exposed on purpose but existing for convenience when testing.
      */
     private val subServiceProvider: SubServicesProvider = SubServicesProvider.createInstance()
 

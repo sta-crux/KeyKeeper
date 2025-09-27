@@ -21,10 +21,10 @@ dependencies {
 
     // telegram
     implementation("org.telegram:telegrambots-longpolling:9.1.0")
-    implementation("org.telegram:telegrambots-meta:8.2.0")
-    implementation("org.telegram:telegrambots-client:8.2.0")
+    implementation("org.telegram:telegrambots-meta:9.1.0")
+    implementation("org.telegram:telegrambots-client:9.1.0")
     // logging
-    implementation("org.slf4j:slf4j-api:2.0.7")
+    implementation("org.slf4j:slf4j-api:2.0.17")
     implementation("ch.qos.logback:logback-classic:1.5.13")
     // to zip to create or unpack backup files
     implementation("net.lingala.zip4j:zip4j:2.11.5")
@@ -59,28 +59,6 @@ tasks {
         archiveBaseName.set("keykeeper")
         archiveVersion.set("1.0")
         archiveClassifier.set("")
-    }
-}
-
-
-publishing {
-    publications {
-        create<MavenPublication>("gpr") {
-            from(components["java"]) // this publishes only your compiled code + resources, no deps
-            groupId = "com.stacrux"
-            artifactId = "keykeeper"
-            version = "1.0.7"
-        }
-    }
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/sta-crux/KeyKeeper")
-            credentials {
-                username = System.getenv("GPR_USER")
-                password = System.getenv("GPR_TOKEN_KEYKEEPER")
-            }
-        }
     }
 }
 
