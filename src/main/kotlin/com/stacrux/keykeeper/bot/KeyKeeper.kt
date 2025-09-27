@@ -1,7 +1,10 @@
 package com.stacrux.keykeeper.bot
 
+import com.stacrux.keykeeper.bot.model.ActionsButtons
 import com.stacrux.keykeeper.bot.model.BotBindingDetails
 import com.stacrux.keykeeper.bot.model.BotRunningState
+import org.telegram.telegrambots.meta.generics.TelegramClient
+import java.io.File
 
 /**
  * This is the main interface representing a long-lasting bot, the bot is born with the app boot
@@ -10,6 +13,8 @@ import com.stacrux.keykeeper.bot.model.BotRunningState
  * life-stage: Serving the passwords, in this stage the bot serves the password or store new ones if needed
  */
 interface KeyKeeper {
+
+    fun getClientHolder(): KeyKeeperClientHolder
 
     /**
      * used to set the user id that the bot will reply to with the passwords
@@ -46,4 +51,12 @@ interface KeyKeeper {
      * Returns the binding key if the bot is unbound, otherwise throws an exception
      */
     fun getBindingKey(): String
+
+    /**
+     * returns the bot username from telegram servers
+     */
+    fun getBotUserName(): String {
+        return getClientHolder().getBotUserName()
+    }
+
 }

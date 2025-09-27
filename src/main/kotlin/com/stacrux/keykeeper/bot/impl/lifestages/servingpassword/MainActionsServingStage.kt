@@ -1,4 +1,4 @@
-package com.stacrux.keykeeper.bot.lifestages.stages.servingpassword
+package com.stacrux.keykeeper.bot.impl.lifestages.servingpassword
 
 import com.stacrux.keykeeper.bot.model.ActionButton
 import com.stacrux.keykeeper.bot.model.ActionsButtons

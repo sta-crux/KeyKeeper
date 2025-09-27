@@ -1,4 +1,4 @@
-package com.stacrux.keykeeper.bot.lifestages.stages.backupstage
+package com.stacrux.keykeeper.bot.impl.lifestages.backupstage
 
 import com.stacrux.keykeeper.bot.model.ActionButton
 import com.stacrux.keykeeper.bot.model.ActionsButtons

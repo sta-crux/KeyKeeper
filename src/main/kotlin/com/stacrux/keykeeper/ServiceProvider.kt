@@ -1,7 +1,7 @@
 package com.stacrux.keykeeper
 
 import com.stacrux.keykeeper.bot.KeyKeeper
-import com.stacrux.keykeeper.bot.KeyKeeperImpl
+import com.stacrux.keykeeper.bot.impl.KeyKeeperImpl
 import com.stacrux.keykeeper.persistence.CredentialsManager
 import com.stacrux.keykeeper.persistence.InteractionsManager
 import com.stacrux.keykeeper.persistence.SessionManager

@@ -1,15 +1,11 @@
 package com.stacrux.keykeeper
 
 import com.stacrux.keykeeper.bot.model.BotRunningState
-import io.ktor.server.application.call
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.server.request.receiveParameters
-import io.ktor.server.response.respond
-import io.ktor.server.routing.get
-
-import io.ktor.server.routing.post
-import io.ktor.server.routing.routing
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import java.io.File
 
 private val keyKeeperDir = File(System.getProperty("user.home"), "keyKeeper").apply { mkdirs() }

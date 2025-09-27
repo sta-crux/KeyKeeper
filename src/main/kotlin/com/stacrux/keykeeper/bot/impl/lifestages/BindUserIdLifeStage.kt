@@ -1,6 +1,7 @@
-package com.stacrux.keykeeper.bot.lifestages.stages
+package com.stacrux.keykeeper.bot.impl.lifestages
 
-import com.stacrux.keykeeper.bot.lifestages.AbstractBotLifeStage
+import com.stacrux.keykeeper.bot.AbstractBotLifeStage
+import com.stacrux.keykeeper.bot.KeyKeeperClientHolder
 import com.stacrux.keykeeper.model.ActionRequestFromTelegram
 import com.stacrux.keykeeper.bot.model.BotRunningState
 import com.stacrux.keykeeper.model.FileProvidedByTelegramUser
@@ -9,7 +10,8 @@ import com.stacrux.keykeeper.service.SessionService
 import org.apache.commons.lang3.RandomStringUtils
 import org.slf4j.LoggerFactory
 
-class BindUserIdLifeStage(token: String, private val sessionService: SessionService) : AbstractBotLifeStage(token) {
+class BindUserIdLifeStage(keyKeeperClientHolder: KeyKeeperClientHolder, private val sessionService: SessionService) :
+    AbstractBotLifeStage(keyKeeperClientHolder) {
 
     private val logger = LoggerFactory.getLogger(BindUserIdLifeStage::class.java)
     private val messagesHitCounter: MutableMap<String, Int> = mutableMapOf()

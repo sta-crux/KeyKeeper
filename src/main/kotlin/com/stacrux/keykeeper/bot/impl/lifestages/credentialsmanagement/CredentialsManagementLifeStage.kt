@@ -1,6 +1,7 @@
-package com.stacrux.keykeeper.bot.lifestages.stages.credentialsmanagement
+package com.stacrux.keykeeper.bot.impl.lifestages.credentialsmanagement
 
-import com.stacrux.keykeeper.bot.lifestages.AbstractBotLifeStage
+import com.stacrux.keykeeper.bot.AbstractBotLifeStage
+import com.stacrux.keykeeper.bot.KeyKeeperClientHolder
 import com.stacrux.keykeeper.bot.model.BotRunningState
 import com.stacrux.keykeeper.model.ActionRequestFromTelegram
 import com.stacrux.keykeeper.model.FileProvidedByTelegramUser
@@ -10,10 +11,10 @@ import org.apache.commons.lang3.StringUtils
 import org.slf4j.LoggerFactory
 
 class CredentialsManagementLifeStage(
+    keyKeeperClientHolder: KeyKeeperClientHolder,
     val chatId: String,
-    botToken: String,
     private val credentialsService: CredentialsService
-) : AbstractBotLifeStage(botToken) {
+) : AbstractBotLifeStage(keyKeeperClientHolder) {
 
     private val logger = LoggerFactory.getLogger(CredentialsManagementLifeStage::class.java)
 

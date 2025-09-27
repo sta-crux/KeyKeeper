@@ -1,6 +1,7 @@
-package com.stacrux.keykeeper.bot.lifestages.stages.backupstage
+package com.stacrux.keykeeper.bot.impl.lifestages.backupstage
 
-import com.stacrux.keykeeper.bot.lifestages.AbstractBotLifeStage
+import com.stacrux.keykeeper.bot.AbstractBotLifeStage
+import com.stacrux.keykeeper.bot.KeyKeeperClientHolder
 import com.stacrux.keykeeper.bot.model.*
 import com.stacrux.keykeeper.model.ActionRequestFromTelegram
 import com.stacrux.keykeeper.model.FileProvidedByTelegramUser
@@ -13,13 +14,13 @@ import org.slf4j.LoggerFactory
 import java.io.File
 
 class BackUpLifeStage(
-    token: String,
+    keyKeeperClientHolder: KeyKeeperClientHolder,
     val chatId: String,
     private val backUpService: BackUpService,
     private val credentialsService: CredentialsService,
     private val sessionService: SessionService
 ) :
-    AbstractBotLifeStage(token) {
+    AbstractBotLifeStage(keyKeeperClientHolder) {
 
     private val logger = LoggerFactory.getLogger(BackUpLifeStage::class.java)
     private val primaryActions = MainActionsBackupOptionsStage

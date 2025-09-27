@@ -1,6 +1,7 @@
-package com.stacrux.keykeeper.bot.lifestages.stages.addcredentials
+package com.stacrux.keykeeper.bot.impl.lifestages.addcredentials
 
-import com.stacrux.keykeeper.bot.lifestages.AbstractBotLifeStage
+import com.stacrux.keykeeper.bot.AbstractBotLifeStage
+import com.stacrux.keykeeper.bot.KeyKeeperClientHolder
 import com.stacrux.keykeeper.bot.model.*
 import com.stacrux.keykeeper.model.ActionRequestFromTelegram
 import com.stacrux.keykeeper.model.FileProvidedByTelegramUser
@@ -13,11 +14,11 @@ import org.slf4j.LoggerFactory
  * This life stage is used to group the features around adding new credentials to the vault
  */
 class AddNewCredentialsStage(
-    token: String,
+    keyKeeperClientHolder: KeyKeeperClientHolder,
     val chatId: String,
     private val credentialsService: CredentialsService,
     private val websiteParsingService: WebsiteParsingService
-) : AbstractBotLifeStage(token) {
+) : AbstractBotLifeStage(keyKeeperClientHolder) {
 
     private val logger = LoggerFactory.getLogger(AddNewCredentialsStage::class.java)
 

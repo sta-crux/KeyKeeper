@@ -1,31 +1,15 @@
-package com.stacrux.keykeeper.bot.lifestages
+package com.stacrux.keykeeper.bot
 
-import com.stacrux.keykeeper.ServiceProvider
-import com.stacrux.keykeeper.bot.KeyKeeper
 import com.stacrux.keykeeper.bot.model.ActionsButtons
-import com.stacrux.keykeeper.model.ActionRequestFromTelegram
-import com.stacrux.keykeeper.model.FileProvidedByTelegramUser
-import com.stacrux.keykeeper.model.TextRequestFromTelegram
-import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer
+import org.telegram.telegrambots.meta.generics.TelegramClient
 import java.io.File
 
-interface BotLifeStage : LongPollingSingleThreadUpdateConsumer {
+interface KeyKeeperClientHolder {
 
     /**
-     * Override this into your implementations to perform actions after having received some text
+     * returns the bot username from telegram servers
      */
-    fun reactToTextRequest(request: TextRequestFromTelegram)
-
-    /**
-     * Override this into your implementations to perform actions after having received an action
-     * (button click)
-     */
-    fun reactToActionRequest(request: ActionRequestFromTelegram)
-
-    /**
-     * Override this into your implementations to perform actions after having received a file
-     */
-    fun reactToReceivedFile(request: FileProvidedByTelegramUser)
+    fun getBotUserName(): String
 
     /**
      * By calling this method, a message is sent to a chat identified by chatId
@@ -65,14 +49,12 @@ interface BotLifeStage : LongPollingSingleThreadUpdateConsumer {
     fun sendFile(chatId: String, file: File)
 
     /**
-     * Return the main context, where the user id (which correspond to the chat id) is stored.
+     * For advanced uses not available here (send message, send file etc), the telegram client can be retrieved calling this
      */
-    fun getKeyKeeper(): KeyKeeper {
-        return ServiceProvider.getKeyKeeperService()
-    }
+    fun exposeTelegramClient(): TelegramClient
 
     /**
-     * returns the bot username from telegram servers
+     * For advanced uses, exposing the token
      */
-    fun getBotUserName(): String
+    fun exposeToken(): String
 }

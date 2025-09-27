@@ -1,4 +1,4 @@
-package com.stacrux.keykeeper.bot.lifestages.stages.addcredentials
+package com.stacrux.keykeeper.bot.impl.lifestages.addcredentials
 
 import com.stacrux.keykeeper.bot.model.ActionButton
 import com.stacrux.keykeeper.bot.model.ActionsButtons

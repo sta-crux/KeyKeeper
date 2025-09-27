@@ -1,6 +1,7 @@
-package com.stacrux.keykeeper.bot.lifestages.stages.servingpassword
+package com.stacrux.keykeeper.bot.impl.lifestages.servingpassword
 
-import com.stacrux.keykeeper.bot.lifestages.AbstractBotLifeStage
+import com.stacrux.keykeeper.bot.AbstractBotLifeStage
+import com.stacrux.keykeeper.bot.KeyKeeperClientHolder
 import com.stacrux.keykeeper.bot.model.*
 import com.stacrux.keykeeper.model.ActionRequestFromTelegram
 import com.stacrux.keykeeper.model.CredentialEntry
@@ -14,12 +15,12 @@ import java.time.temporal.ChronoUnit
 
 
 class PasswordServingLifeStage(
-    token: String,
+    keyKeeperClientHolder: KeyKeeperClientHolder,
     val chatId: String,
     private val credentialsService: CredentialsService,
     private val websiteParsingService: WebsiteParsingService
 ) :
-    AbstractBotLifeStage(token) {
+    AbstractBotLifeStage(keyKeeperClientHolder) {
 
     private val logger = LoggerFactory.getLogger(PasswordServingLifeStage::class.java)
     private val primaryActions = MainActionsServingStage
