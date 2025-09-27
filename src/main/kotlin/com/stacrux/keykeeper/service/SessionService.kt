@@ -17,5 +17,5 @@ interface SessionService {
     fun retrieveBackUpFile(): File
     fun storeBackUpFile(backUpFile: File, backUpTag: String)
     fun toggleLocalBackUpStoring(isActive: Boolean)
-
+    fun getBoundUserId(): String
 }

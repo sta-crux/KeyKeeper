@@ -138,8 +138,8 @@ class BackUpLifeStage(
         val timeBeforeDelete = 10
         sendMessage(
             request.chatId,
-            "Store this secret in your Saved Messages, I'll delete it from here in ${timeBeforeDelete}.\n" +
-                    "\uD83C\uDFF7\uFE0F backup file tag: `$backUpTag`\n" +
+            "Store this secret in your Saved Messages, I'll delete it from here in $timeBeforeDelete " +
+                    "minutes.\n\uD83C\uDFF7\uFE0F backup file tag: `$backUpTag`\n" +
                     "\uD83D\uDD11 backup file password: `$encryptionKey`",
             deleteAfterMinutes = timeBeforeDelete
         )

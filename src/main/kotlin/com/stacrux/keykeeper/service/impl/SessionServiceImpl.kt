@@ -54,4 +54,8 @@ class SessionServiceImpl(private val sessionManager: SessionManager) : SessionSe
             sessionManager.disableLocalBackUp()
         }
     }
+
+    override fun getBoundUserId(): String {
+        return sessionManager.retrieveSession().boundUserId
+    }
 }
