@@ -13,7 +13,7 @@ private val botTokenFile = File(keyKeeperDir, "botToken")
 
 private fun loadBotToken(): String? {
     val file = File(keyKeeperDir, "botToken")
-    return file.takeIf { it.exists() && it.length() > 0}?.readText()?.trim()
+    return file.takeIf { it.exists() && it.length() > 0 }?.readText()?.trim()
 }
 
 /**
@@ -54,6 +54,30 @@ fun main() {
                 } catch (e: Exception) {
                     println(e.message)
                     call.respond("Error storing the token\n")
+                }
+            }
+
+            // POST /sendMessageToBoundUser
+            post("/sendTextMessageToBoundUser") {
+                if (ServiceProvider.getKeyKeeperService().getRunningState() == BotRunningState.UNBOUND) {
+                    call.respond("The bot is not bound to any user!\n")
+                }
+                val params = call.receiveParameters()
+                val messageContent = params["messageContent"]
+                if (messageContent.isNullOrBlank()) {
+                    call.respond("Error: I won't send an empty message...\n")
+                    return@post
+                }
+
+                try {
+                    val clientHolder = ServiceProvider.getKeyKeeperService().getClientHolder()
+                    clientHolder.sendMessage(
+                        chatId = ServiceProvider.getDefaultSessionService().getBoundUserId(),
+                        messageContent = messageContent
+                    )
+                } catch (e: Exception) {
+                    println(e.message)
+                    call.respond("Error sending the message to the bound user\n")
                 }
             }
 
